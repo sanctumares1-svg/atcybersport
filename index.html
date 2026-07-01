@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AT Cybersport — геймерские девайсы · Ашхабад</title>
+<meta name="description" content="AT Cybersport — мыши, клавиатуры, гарнитуры и коврики для киберспорта. Ашхабад, Туркменистан.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/logo.svg">
+<link rel="stylesheet" href="assets/styles.css">
+<script src="assets/app.js"></script>
+<script src="assets/ui.js"></script>
+</head>
+<body>
+<div class="at-glows"><i></i><i></i></div>
+<div class="at-grain"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="brand">
+    <img src="assets/logo.svg" alt="AT" data-brand-logo>
+    <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
+    <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
+    <a href="index.html#about" data-i18n="nav.about">команда</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang" data-langswitch></div>
+    <button class="cart-btn" data-open-cart><span class="cart-label" data-i18n="nav.cart">корзина</span> · <span data-cart-count>0</span></button>
+    <button class="burger" id="burger" aria-label="Меню"><i></i><i></i><i></i></button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
+  <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
+  <a href="index.html#about" data-i18n="nav.about">команда</a>
+  <a href="#" data-open-cart data-i18n="nav.cart">корзина</a>
+  <div class="lang mm-lang" data-langswitch></div>
+</div>
+
+<main class="page">
+
+<!-- HERO -->
+<header class="hero">
+  <a href="product.html?id=p1" class="hero-banner" data-stage>
+    <div class="hero-box">
+      <div class="hero-left">
+        <div class="hero-kicker" data-i18n="hero.kicker">AT CYBERSPORT</div>
+        <div class="hero-name">stallion</div>
+        <div class="hero-sub"><b>pro</b><span data-i18n="hero.sub">/ 54 г · 8000 Гц</span></div>
+        <p class="hero-desc" data-i18n="hero.desc">Теперь в титановом корпусе.</p>
+        <span class="hero-cta"><span class="br">[</span> <span data-i18n="hero.cta">подробнее</span> <span class="br">]</span></span>
+      </div>
+      <div class="hero-art">
+        <div class="hero-checker"></div>
+        <div class="hero-spot"></div>
+        <div class="hero-tilt" data-tilt>
+          <div class="hero-float" id="heroImg"><div class="hero-ph">ФОТО ФЛАГМАНА</div></div>
+        </div>
+      </div>
+    </div>
+  </a>
+</header>
+
+<!-- MARQUEE -->
+<div class="marquee">
+  <div class="marquee-row">
+    <div><span data-i18n="marq.mice">мыши</span><span class="star">✦</span><span data-i18n="marq.keyboards">клавиатуры</span><span class="star">✦</span><span data-i18n="marq.headsets">гарнитуры</span><span class="star">✦</span><span data-i18n="marq.pads">коврики</span><span class="star">✦</span></div>
+    <div aria-hidden="true"><span data-i18n="marq.mice">мыши</span><span class="star">✦</span><span data-i18n="marq.keyboards">клавиатуры</span><span class="star">✦</span><span data-i18n="marq.headsets">гарнитуры</span><span class="star">✦</span><span data-i18n="marq.pads">коврики</span><span class="star">✦</span></div>
+  </div>
+</div>
+
+<!-- ПОПУЛЯРНЫЕ -->
+<section class="section" id="popular">
+  <div class="wrap">
+    <h2 class="h-section" data-reveal><span data-i18n="sec.popular">популярные товары</span><sup id="popCount">( 6 )</sup></h2>
+    <div class="prod-grid" id="popularGrid"></div>
+  </div>
+</section>
+
+<!-- КАТЕГОРИИ -->
+<section class="section" id="categories">
+  <div class="wrap">
+    <h2 class="h-section" data-reveal><span data-i18n="sec.categories">категории</span><sup id="catCount">( 4 )</sup></h2>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+</section>
+
+<!-- ТЕХНОЛОГИИ -->
+<section class="section" id="tech">
+  <div class="wrap">
+    <h2 class="h-section" data-reveal><span data-i18n="sec.tech">технологии</span><sup>( 4 )</sup></h2>
+    <div class="tech-grid">
+      <div class="tech-cell" data-reveal><div class="tcode">/ a-01</div><div><h3 data-i18n="tech.1t">сенсор 42K</h3><p data-i18n="tech.1d">42 000 DPI · 750 IPS · нулевое сглаживание.</p></div></div>
+      <div class="tech-cell" data-reveal data-delay="80"><div class="tcode">/ a-02</div><div><h3 data-i18n="tech.2t">отклик 8000 Гц</h3><p data-i18n="tech.2d">позиция каждые 0,125 мс по каналу AT-LINK.</p></div></div>
+      <div class="tech-cell" data-reveal data-delay="160"><div class="tcode">/ a-03</div><div><h3 data-i18n="tech.3t">магниевый сплав</h3><p data-i18n="tech.3d">жёсткость корпуса при минимальном весе — 54 г.</p></div></div>
+      <div class="tech-cell" data-reveal data-delay="240"><div class="tcode">/ a-04</div><div><h3 data-i18n="tech.4t">95 часов</h3><p data-i18n="tech.4d">почти пять турнирных дней без подзарядки.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- О НАС -->
+<section class="section" id="about">
+  <div class="wrap">
+    <h2 class="h-section" data-reveal data-i18n="sec.about">о нас</h2>
+    <div class="about-grid">
+      <div data-reveal>
+        <p class="about-lead" data-i18n="about.lead">AT Cybersport проектирует девайсы на одном принципе — убрать всё лишнее между намерением игрока и действием в игре. Собираем и тестируем в одной лаборатории.</p>
+        <div class="about-metrics">
+          <div><div class="num">4</div><div class="lab" data-i18n="about.m1">категории</div></div>
+          <div><div class="num">100%</div><div class="lab" data-i18n="about.m2">свой R&D</div></div>
+          <div><div class="num">2</div><div class="lab" data-i18n="about.m3">гарантия</div></div>
+        </div>
+      </div>
+      <div class="about-visual" data-reveal data-delay="120">
+        <img src="assets/logo.svg" alt="AT">
+        <div class="tag">AT-LAB / ASHGABAT</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <a href="catalog.html" data-magnetic="0.4" data-reveal><span class="br">[</span> <span data-i18n="toCatalog">в каталог</span> <span class="br">]</span></a>
+</section>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-col">
+      <a href="index.html" class="brand" style="margin-bottom:18px">
+        <img src="assets/logo.svg" alt="AT" data-brand-logo>
+        <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
+      </a>
+      <p data-i18n="foot.tagline">девайсы для тех, кто играет на победу.</p>
+    </div>
+    <div class="footer-col">
+      <div class="ft" data-i18n="foot.catalog">каталог</div>
+      <div class="links">
+        <a href="catalog.html?cat=mice" data-i18n="marq.mice">мыши</a>
+        <a href="catalog.html?cat=keyboards" data-i18n="marq.keyboards">клавиатуры</a>
+        <a href="catalog.html?cat=headsets" data-i18n="marq.headsets">гарнитуры</a>
+        <a href="catalog.html?cat=pads" data-i18n="marq.pads">коврики</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="ft" data-i18n="foot.company">компания</div>
+      <div class="links">
+        <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
+        <a href="index.html#about" data-i18n="sec.about">о нас</a>
+        <a href="#" data-open-cart data-i18n="nav.cart">корзина</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="ft" data-i18n="foot.contact">связь</div>
+      <div class="links" id="footContacts"></div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 AT CYBERSPORT</span>
+    <span data-i18n="foot.copyright">сделано для победы</span>
+  </div>
+</footer>
+
+<script>
+window.AT.ready(function(){
+  var AT=window.AT, S=AT.Store;
+  // логотип из настроек
+  var logo=AT.logoSrc();
+  document.querySelectorAll('[data-brand-logo]').forEach(function(i){ i.src=logo; });
+  var av=document.querySelector('.about-visual img'); if(av) av.src=logo;
+
+  var products=S.products(), cats=S.categories(), st=S.settings();
+
+  // герой: фото флагмана (p1) если есть
+  var flagship=products.filter(function(p){return p.id==='p1';})[0]||products[0];
+  if(flagship && AT.firstImg(flagship)){
+    document.getElementById('heroImg').innerHTML='<img src="'+AT.esc(AT.firstImg(flagship))+'" alt="'+AT.esc(flagship.name)+'">';
+  }
+
+  // популярные — первые 6
+  var pop=products.slice(0,6);
+  document.getElementById('popularGrid').innerHTML=pop.map(function(p,i){return AT.ui.popularCell(p,(i%3)*70);}).join('');
+  document.getElementById('popCount').textContent='( '+pop.length+' )';
+
+  // категории
+  document.getElementById('catGrid').innerHTML=cats.map(function(c,i){
+    var sample=products.filter(function(p){return p.category===c.id && AT.firstImg(p);})[0];
+    return AT.ui.categoryCell(c,(i%2)*70,sample?AT.firstImg(sample):'');
+  }).join('');
+  document.getElementById('catCount').textContent='( '+cats.length+' )';
+
+  AT.ui.wireCatalogAdd(document.getElementById('popularGrid'));
+
+  // контакты в футере
+  var fc=document.getElementById('footContacts'), links=[];
+  if(st.telegram){ var tg=st.telegram.replace(/^@/,''); links.push('<a href="https://t.me/'+AT.esc(tg)+'" target="_blank">Telegram</a>'); }
+  if(st.whatsapp){ links.push('<a href="https://wa.me/'+AT.esc(st.whatsapp.replace(/\D/g,''))+'" target="_blank">WhatsApp</a>'); }
+  if(st.phone){ links.push('<a href="tel:'+AT.esc(st.phone.replace(/\s/g,''))+'">'+AT.esc(st.phone)+'</a>'); }
+  links.push('<span style="color:var(--dim)">'+AT.esc(st.city)+'</span>');
+  fc.innerHTML=links.join('');
+});
+</script>
+</body>
+</html>

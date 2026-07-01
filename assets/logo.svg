@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <!-- AT Cybersport — стилизованная голова коня (низкополигональная). Замените своим PNG при необходимости. -->
+  <g fill="#f4f4f5">
+    <path d="M30 90 L25 58 L16 50 L31 47 L33 36 L41 42 L45 26 L52 43 L63 30 L60 50 L70 58 L62 72 L67 90 Z"/>
+  </g>
+  <g fill="#08080a">
+    <circle cx="41" cy="52" r="2.6"/>
+  </g>
+  <g fill="#f4f4f5">
+    <path d="M45 26 L48 20 L52 33 Z"/>
+  </g>
+</svg>

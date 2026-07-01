@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Товар — AT Cybersport</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/logo.svg">
+<link rel="stylesheet" href="assets/styles.css">
+<script src="assets/app.js"></script>
+<script src="assets/ui.js"></script>
+</head>
+<body>
+<div class="at-glows"><i></i><i></i></div>
+<div class="at-grain"></div>
+
+<nav class="nav">
+  <a href="index.html" class="brand">
+    <img src="assets/logo.svg" alt="AT" data-brand-logo>
+    <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
+    <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
+    <a href="index.html#about" data-i18n="nav.about">команда</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang" data-langswitch></div>
+    <button class="cart-btn" data-open-cart><span class="cart-label" data-i18n="nav.cart">корзина</span> · <span data-cart-count>0</span></button>
+    <button class="burger" id="burger" aria-label="Меню"><i></i><i></i><i></i></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
+  <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
+  <a href="index.html#about" data-i18n="nav.about">команда</a>
+  <a href="#" data-open-cart data-i18n="nav.cart">корзина</a>
+  <div class="lang mm-lang" data-langswitch></div>
+</div>
+
+<main class="page" id="productRoot"><!-- рендер из JS --></main>
+
+<footer class="footer">
+  <div class="footer-grid" style="grid-template-columns:1fr auto">
+    <a href="index.html" class="brand">
+      <img src="assets/logo.svg" alt="AT" data-brand-logo>
+      <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
+    </a>
+    <span style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--dim)">© 2026 AT CYBERSPORT</span>
+  </div>
+</footer>
+
+<script>
+window.AT.ready(function(){
+  var AT=window.AT, S=AT.Store, esc=AT.esc, money=AT.money, t=AT.t;
+  document.querySelectorAll('[data-brand-logo]').forEach(function(i){ i.src=AT.logoSrc(); });
+
+  var params=new URLSearchParams(location.search);
+  var id=params.get('id');
+  var products=S.products();
+  var p=products.filter(function(x){return x.id===id;})[0]||products[0];
+  var cat=AT.catById(p.category);
+  var root=document.getElementById('productRoot');
+
+  var imgs=(p.images&&p.images.length)?p.images:[];
+  function mainImgHTML(src){ return src?'<img src="'+esc(src)+'" alt="'+esc(p.name)+'">':'<div class="ph">ГЛАВНОЕ ФОТО</div>'; }
+
+  var thumbsHTML='';
+  for(var i=0;i<4;i++){
+    var src=imgs[i]||'';
+    thumbsHTML+='<div class="t'+(i===0?' on':'')+'" data-thumb="'+i+'">'+(src?'<img src="'+esc(src)+'" alt="">':'')+'</div>';
+  }
+
+  var badges='';
+  if(cat) badges+='<span class="p-tag">'+esc(AT.catName(cat))+'</span>';
+  if(p.badge) badges+='<span class="p-tag solid">'+esc(p.badge)+'</span>';
+
+  var priceRow='<span class="p-price">'+money(p.price)+'</span>';
+  if(p.oldPrice&&p.oldPrice>p.price){
+    var off=Math.round((1-p.price/p.oldPrice)*100);
+    priceRow+='<span class="p-old">'+money(p.oldPrice)+'</span><span class="p-off">−'+off+'%</span>';
+  }
+
+  var swatches=(p.colors||[]).map(function(c,i){
+    return '<button class="swatch'+(i===0?' on':'')+'" data-color="'+esc(c.name)+'" style="background:'+esc(c.hex)+'" aria-label="'+esc(c.name)+'"></button>';
+  }).join('');
+  var colorBlock=(p.colors&&p.colors.length)?
+    '<div class="p-block"><div class="lab">'+t('p.color')+' — <span id="colorLabel">'+esc(p.colors[0].name)+'</span></div><div class="swatches">'+swatches+'</div></div>':'';
+
+  var quick=(p.quick||[]).slice(0,4).map(function(q){
+    return '<div><div class="qv">'+esc(q[0])+'</div><div class="ql">'+esc(q[1])+'</div></div>';
+  }).join('');
+  var quickBlock=quick?'<div class="quick-specs">'+quick+'</div>':'';
+
+  var specsRows=(p.specs||[]).map(function(s){
+    return '<div class="r"><span class="k">'+esc(s[0])+'</span><span class="v">'+esc(s[1])+'</span></div>';
+  }).join('');
+  var inBox=(p.inBox||[]).map(function(x,i){
+    var n=('0'+(i+1)).slice(-2);
+    return '<span><span class="n">'+n+'</span> '+esc(x)+'</span>';
+  }).join('');
+
+  var related=products.filter(function(x){return x.id!==p.id;}).slice(0,3);
+  var relatedHTML=related.map(function(r){return AT.ui.relatedCard(r);}).join('');
+
+  var statusHTML=
+    '<span><span class="dot '+(p.inStock?'ok':'')+'"></span>'+(p.inStock?t('p.instock'):t('p.outstock'))+'</span>'+
+    '<span><span class="dot"></span>'+t('p.delivery')+'</span>'+
+    '<span><span class="dot"></span>'+t('p.warranty')+'</span>';
+
+  root.innerHTML=
+  '<div class="crumb"><a href="index.html">'+t('crumb.home')+'</a> / <a href="catalog.html">'+t('nav.catalog')+'</a>'+(cat?' / <a href="catalog.html?cat='+esc(cat.id)+'">'+esc(AT.catName(cat))+'</a>':'')+' / <span class="cur">'+esc(p.name)+'</span></div>'+
+  '<section class="product">'+
+    '<div class="gallery" data-reveal>'+
+      '<div class="main" id="mainImg">'+mainImgHTML(imgs[0]||'')+(p.ref?'<span class="ref">REF. '+esc(p.ref)+'</span>':'')+'</div>'+
+      '<div class="thumbs" id="thumbs">'+thumbsHTML+'</div>'+
+    '</div>'+
+    '<div>'+
+      '<div class="p-tags" data-reveal>'+badges+'</div>'+
+      '<h1 class="p-title" data-reveal>'+esc(p.name)+'</h1>'+
+      '<p class="p-desc" data-reveal>'+esc(p.description||'')+'</p>'+
+      '<div class="p-price-row" data-reveal>'+priceRow+'</div>'+
+      colorBlock+
+      '<div class="buy-row" data-reveal>'+
+        '<div class="stepper"><button id="qMinus">−</button><span class="v" id="qVal">1</span><button id="qPlus">+</button></div>'+
+        '<button class="add-cart" id="addCart"><span id="addText">'+t('addCart')+'</span>'+
+          '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#08080a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+      '</div>'+
+      quickBlock+
+      '<div class="p-status" data-reveal>'+statusHTML+'</div>'+
+    '</div>'+
+  '</section>'+
+  (specsRows?(
+  '<section class="specs-section">'+
+    '<div class="specs-grid">'+
+      '<div>'+
+        '<div class="eyebrow" data-reveal>'+t('p.specs')+'</div>'+
+        '<h2 class="specs-h" data-reveal style="margin-top:18px">'+t('p.fullspec')+'</h2>'+
+        '<div class="specs-list">'+specsRows+'</div>'+
+      '</div>'+
+      (inBox?('<div class="inbox" data-reveal><div class="lab">'+t('p.inbox')+'</div><div class="list">'+inBox+'</div></div>'):'')+
+    '</div>'+
+  '</section>'):'')+
+  (relatedHTML?(
+  '<section class="related">'+
+    '<div class="wrap-in">'+
+      '<div class="head" data-reveal><h2>'+t('p.related')+'</h2><a href="catalog.html">'+t('p.allcatalog')+'</a></div>'+
+      '<div class="rel-grid">'+relatedHTML+'</div>'+
+    '</div>'+
+  '</section>'):'');
+
+  document.title=p.name+' — AT Cybersport';
+
+  // thumbnails
+  var chosenColor=(p.colors&&p.colors[0]&&p.colors[0].name)||'';
+  document.querySelectorAll('#thumbs .t').forEach(function(tb){
+    tb.onclick=function(){
+      var idx=+tb.getAttribute('data-thumb'); var src=imgs[idx];
+      if(!src) return;
+      document.querySelectorAll('#thumbs .t').forEach(function(x){x.classList.remove('on');});
+      tb.classList.add('on');
+      document.getElementById('mainImg').innerHTML=mainImgHTML(src)+(p.ref?'<span class="ref">REF. '+esc(p.ref)+'</span>':'');
+    };
+  });
+  // colors
+  document.querySelectorAll('.swatch').forEach(function(sw){
+    sw.onclick=function(){
+      document.querySelectorAll('.swatch').forEach(function(x){x.classList.remove('on');});
+      sw.classList.add('on'); chosenColor=sw.getAttribute('data-color');
+      var lbl=document.getElementById('colorLabel'); if(lbl) lbl.textContent=chosenColor;
+    };
+  });
+  // qty
+  var qty=1;
+  document.getElementById('qMinus').onclick=function(){ qty=Math.max(1,qty-1); document.getElementById('qVal').textContent=qty; };
+  document.getElementById('qPlus').onclick=function(){ qty++; document.getElementById('qVal').textContent=qty; };
+  // add to cart
+  var addBtn=document.getElementById('addCart'), addText=document.getElementById('addText');
+  addBtn.onclick=function(){
+    AT.addToCart(p,qty,chosenColor);
+    addText.textContent=t('added')+' · '+qty; addBtn.style.background='var(--success)';
+    setTimeout(function(){ addText.textContent=t('addCart'); addBtn.style.background=''; },1500);
+  };
+
+  AT.ui.wireCatalogAdd(root);
+});
+</script>
+</body>
+</html>

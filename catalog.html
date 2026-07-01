@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Каталог — AT Cybersport</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/logo.svg">
+<link rel="stylesheet" href="assets/styles.css">
+<script src="assets/app.js"></script>
+<script src="assets/ui.js"></script>
+</head>
+<body>
+<div class="at-glows"><i></i><i></i></div>
+<div class="at-grain"></div>
+
+<nav class="nav">
+  <a href="index.html" class="brand">
+    <img src="assets/logo.svg" alt="AT" data-brand-logo>
+    <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
+    <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
+    <a href="index.html#about" data-i18n="nav.about">команда</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang" data-langswitch></div>
+    <button class="cart-btn" data-open-cart><span class="cart-label" data-i18n="nav.cart">корзина</span> · <span data-cart-count>0</span></button>
+    <button class="burger" id="burger" aria-label="Меню"><i></i><i></i><i></i></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
+  <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
+  <a href="index.html#about" data-i18n="nav.about">команда</a>
+  <a href="#" data-open-cart data-i18n="nav.cart">корзина</a>
+  <div class="lang mm-lang" data-langswitch></div>
+</div>
+
+<main class="page">
+<header class="cat-header">
+  <div class="wrap-in">
+    <div class="eyebrow" data-reveal><span data-i18n="catalog.eyebrow">каталог</span> · <span id="posCount">0</span> <span data-i18n="catalog.positions">позиций</span></div>
+    <h1 data-reveal style="margin-top:14px"><span data-i18n="catalog.title">снаряжение</span><sup id="posSup">( 0 )</sup></h1>
+    <p data-reveal data-i18n="catalog.desc">Полная линейка девайсов AT Cybersport. Карточки обновляются администратором магазина.</p>
+  </div>
+</header>
+
+<div class="filters">
+  <div class="row" id="filterRow"></div>
+</div>
+
+<div class="catalog-main">
+  <div class="catalog-grid" id="catalogGrid"></div>
+  <div class="empty" id="emptyState" style="display:none" data-i18n="empty">в этой категории пока пусто</div>
+</div>
+</main>
+
+<footer class="footer">
+  <div class="footer-grid" style="grid-template-columns:1fr auto">
+    <a href="index.html" class="brand">
+      <img src="assets/logo.svg" alt="AT" data-brand-logo>
+      <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
+    </a>
+    <span style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--dim)">© 2026 AT CYBERSPORT</span>
+  </div>
+</footer>
+
+<script>
+window.AT.ready(function(){
+  var AT=window.AT, S=AT.Store;
+  document.querySelectorAll('[data-brand-logo]').forEach(function(i){ i.src=AT.logoSrc(); });
+
+  var products=S.products(), cats=S.categories();
+  var params=new URLSearchParams(location.search);
+  var active=params.get('cat')||'all';
+
+  // счётчики
+  document.getElementById('posCount').textContent=products.length;
+  document.getElementById('posSup').textContent='( '+products.length+' )';
+
+  // чипы фильтра
+  var row=document.getElementById('filterRow');
+  var chips=[{id:'all',label:AT.t('filter.all')}].concat(cats.map(function(c){return{id:c.id,label:AT.catName(c)};}));
+  row.innerHTML=chips.map(function(c){
+    return '<button class="chip'+(c.id===active?' on':'')+'" data-filter="'+AT.esc(c.id)+'">'+AT.esc(c.label)+'</button>';
+  }).join('');
+
+  // сетка
+  var grid=document.getElementById('catalogGrid');
+  grid.innerHTML=products.map(function(p){return AT.ui.catalogCard(p);}).join('');
+  AT.ui.wireCatalogAdd(grid);
+
+  var empty=document.getElementById('emptyState');
+  function apply(f){
+    var shown=0;
+    grid.querySelectorAll('.card').forEach(function(card){
+      var on=(f==='all'||card.getAttribute('data-cat')===f);
+      card.style.display=on?'':'none';
+      if(on){ shown++; card.style.opacity='0'; card.style.transform='translateY(16px)'; requestAnimationFrame(function(){ card.classList.add('in'); card.style.opacity=''; card.style.transform=''; }); }
+    });
+    empty.style.display=shown?'none':'block';
+  }
+  row.querySelectorAll('[data-filter]').forEach(function(chip){
+    chip.onclick=function(){
+      row.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
+      chip.classList.add('on');
+      active=chip.getAttribute('data-filter');
+      apply(active);
+      history.replaceState(null,'', active==='all'?'catalog.html':'catalog.html?cat='+active);
+    };
+  });
+  apply(active);
+});
+</script>
+</body>
+</html>
