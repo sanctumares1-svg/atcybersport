@@ -1,42 +1,62 @@
 <!DOCTYPE html>
+<!-- ============================================================
+     ГЛАВНАЯ СТРАНИЦА (index.html)
+     Структура всех страниц одинаковая:
+       1) <head> — подключение шрифтов, стилей и скриптов
+       2) фон (свечения + зерно)
+       3) шапка .nav + мобильное меню
+       4) основной контент <main>
+       5) подвал <footer>
+       6) <script> внизу — рисует товары/категории из данных
+     Данные (товары, категории, настройки) берутся из data/catalog.json
+     или из правок админа. Логика — в assets/app.js.
+     ============================================================ -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
+<!-- адаптив: масштабирование под ширину телефона -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AT Cybersport — геймерские девайсы · Ашхабад</title>
 <meta name="description" content="AT Cybersport — мыши, клавиатуры, гарнитуры и коврики для киберспорта. Ашхабад, Туркменистан.">
+<!-- шрифты сайта: Manrope (текст) и Space Mono (моноширинные подписи) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="icon" href="assets/logo.svg">
-<link rel="stylesheet" href="assets/styles.css">
-<script src="assets/app.js"></script>
-<script src="assets/ui.js"></script>
+<link rel="icon" href="assets/logo.png"><!-- положи свой файл logo.png (латиницей!) в папку assets --><!-- иконка вкладки -->
+<link rel="stylesheet" href="assets/styles.css"><!-- все стили сайта -->
+<script src="assets/app.js"></script><!-- ЯДРО: данные, языки, корзина, заказы -->
+<script src="assets/ui.js"></script><!-- рисование карточек товаров -->
 </head>
 <body>
+<!-- фон: два мягких свечения (i) + плёнка «зерна» поверх всего -->
 <div class="at-glows"><i></i><i></i></div>
 <div class="at-grain"></div>
 
-<!-- NAV -->
+<!-- ШАПКА САЙТА (фиксирована сверху; при прокрутке получает класс .scrolled)
+     Слева: логотип + название. По центру: ссылки. Справа: языки, корзина, бургер. -->
 <nav class="nav">
   <a href="index.html" class="brand">
-    <img src="assets/logo.svg" alt="AT" data-brand-logo>
+    <img src="assets/logo.png" alt="AT" data-brand-logo><!-- data-brand-logo: сюда JS подставит логотип из настроек -->
     <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
   </a>
+  <!-- ссылки навигации (текст меняется по языку через data-i18n) -->
   <div class="nav-links">
+    <a href="drivers.html" data-i18n="nav.drivers">драйвера</a>
     <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
     <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
     <a href="index.html#about" data-i18n="nav.about">команда</a>
   </div>
   <div class="nav-right">
-    <div class="lang" data-langswitch></div>
+    <div class="lang" data-langswitch></div><!-- переключатель языков RU/TK/EN (заполняет JS) -->
+    <!-- кнопка корзины: data-open-cart открывает панель, data-cart-count — счётчик -->
     <button class="cart-btn" data-open-cart><span class="cart-label" data-i18n="nav.cart">корзина</span> · <span data-cart-count>0</span></button>
-    <button class="burger" id="burger" aria-label="Меню"><i></i><i></i><i></i></button>
+    <button class="burger" id="burger" aria-label="Меню"><i></i><i></i><i></i></button><!-- «гамбургер» на телефоне -->
   </div>
 </nav>
 
-<!-- MOBILE MENU -->
+<!-- МОБИЛЬНОЕ МЕНЮ (открывается по бургеру на телефоне; на ПК скрыто) -->
 <div class="mobile-menu" id="mobileMenu">
+  <a href="drivers.html" data-i18n="nav.drivers">драйвера</a>
   <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
   <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
   <a href="index.html#about" data-i18n="nav.about">команда</a>
@@ -46,45 +66,43 @@
 
 <main class="page">
 
-<!-- HERO -->
+<!-- ПЕРВЫЙ ЭКРАН (герой): баннер-ссылка на флагманский товар.
+     Фото занимает всю площадь; слева по центру — текстовая композиция
+     (как у LUNACY): бренд → большое название → подзаголовок → мелкий текст.
+     Тексты меняются в админке: Настройки → «Баннер». -->
 <header class="hero">
-  <a href="product.html?id=p1" class="hero-banner" data-stage>
-    <div class="hero-box">
-      <div class="hero-left">
-        <div class="hero-kicker" data-i18n="hero.kicker">AT CYBERSPORT</div>
-        <div class="hero-name">stallion</div>
-        <div class="hero-sub"><b>pro</b><span data-i18n="hero.sub">/ 54 г · 8000 Гц</span></div>
-        <p class="hero-desc" data-i18n="hero.desc">Теперь в титановом корпусе.</p>
-        <span class="hero-cta"><span class="br">[</span> <span data-i18n="hero.cta">подробнее</span> <span class="br">]</span></span>
-      </div>
-      <div class="hero-art">
-        <div class="hero-checker"></div>
-        <div class="hero-spot"></div>
-        <div class="hero-tilt" data-tilt>
-          <div class="hero-float" id="heroImg"><div class="hero-ph">ФОТО ФЛАГМАНА</div></div>
-        </div>
-      </div>
+  <a href="product.html?id=p1" class="hero-banner">
+    <!-- слой с фото на всю площадь (сюда JS вставит фото товара p1) -->
+    <div class="hero-media" id="heroImg"><div class="hero-ph">ФОТО БАННЕРА</div></div>
+    <!-- текстовая композиция поверх фото -->
+    <div class="hero-overlay">
+      <div class="hero-kicker" data-i18n="hero.kicker">AT CYBERSPORT</div>
+      <div class="hero-title" id="heroTitle">PRO SERIES</div>
+      <div class="hero-tagline" id="heroTagline">играй на полную</div>
+      <p class="hero-desc" id="heroDesc">Мыши, клавиатуры и гарнитуры AT Cybersport — точность без компромиссов.</p>
+      <span class="hero-cta"><span class="br">[</span> <span data-i18n="hero.cta">подробнее</span> <span class="br">]</span></span>
     </div>
   </a>
 </header>
 
-<!-- MARQUEE -->
-<div class="marquee">
-  <div class="marquee-row">
-    <div><span data-i18n="marq.mice">мыши</span><span class="star">✦</span><span data-i18n="marq.keyboards">клавиатуры</span><span class="star">✦</span><span data-i18n="marq.headsets">гарнитуры</span><span class="star">✦</span><span data-i18n="marq.pads">коврики</span><span class="star">✦</span></div>
-    <div aria-hidden="true"><span data-i18n="marq.mice">мыши</span><span class="star">✦</span><span data-i18n="marq.keyboards">клавиатуры</span><span class="star">✦</span><span data-i18n="marq.headsets">гарнитуры</span><span class="star">✦</span><span data-i18n="marq.pads">коврики</span><span class="star">✦</span></div>
-  </div>
+<!-- СТРОКА ДОВЕРИЯ: короткие обещания магазина (переводятся по языку) -->
+<div class="trust-row" data-reveal>
+  <span data-i18n="trust.1">доставка по Ашхабаду 1–3 дня</span>
+  <span data-i18n="trust.2">гарантия 2 года</span>
+  <span data-i18n="trust.3">оплата при получении</span>
+  <span data-i18n="trust.4">поддержка в WhatsApp</span>
 </div>
 
-<!-- ПОПУЛЯРНЫЕ -->
+<!-- ПОПУЛЯРНЫЕ ТОВАРЫ: заголовок + пустая сетка.
+     Карточки в #popularGrid добавляет скрипт внизу страницы. -->
 <section class="section" id="popular">
   <div class="wrap">
     <h2 class="h-section" data-reveal><span data-i18n="sec.popular">популярные товары</span><sup id="popCount">( 6 )</sup></h2>
-    <div class="prod-grid" id="popularGrid"></div>
+    <div class="prod-grid" id="popularGrid"></div><!-- сюда JS кладёт карточки -->
   </div>
 </section>
 
-<!-- КАТЕГОРИИ -->
+<!-- КАТЕГОРИИ: аналогично, плитки категорий рисует JS в #catGrid -->
 <section class="section" id="categories">
   <div class="wrap">
     <h2 class="h-section" data-reveal><span data-i18n="sec.categories">категории</span><sup id="catCount">( 4 )</sup></h2>
@@ -92,7 +110,7 @@
   </div>
 </section>
 
-<!-- ТЕХНОЛОГИИ -->
+<!-- ТЕХНОЛОГИИ: 4 статичные плитки-преимущества (текст переводится через data-i18n) -->
 <section class="section" id="tech">
   <div class="wrap">
     <h2 class="h-section" data-reveal><span data-i18n="sec.tech">технологии</span><sup>( 4 )</sup></h2>
@@ -105,7 +123,7 @@
   </div>
 </section>
 
-<!-- О НАС -->
+<!-- О НАС: текст + метрики + визуальный блок с логотипом -->
 <section class="section" id="about">
   <div class="wrap">
     <h2 class="h-section" data-reveal data-i18n="sec.about">о нас</h2>
@@ -119,26 +137,26 @@
         </div>
       </div>
       <div class="about-visual" data-reveal data-delay="120">
-        <img src="assets/logo.svg" alt="AT">
+        <img src="assets/logo.png" alt="AT">
         <div class="tag">AT-LAB / ASHGABAT</div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
+<!-- ПРИЗЫВ К ДЕЙСТВИЮ: большая ссылка в каталог (магнитная на ПК) -->
 <section class="cta">
   <a href="catalog.html" data-magnetic="0.4" data-reveal><span class="br">[</span> <span data-i18n="toCatalog">в каталог</span> <span class="br">]</span></a>
 </section>
 
 </main>
 
-<!-- FOOTER -->
+<!-- ПОДВАЛ: логотип, ссылки на категории/разделы и контакты (контакты вставляет JS) -->
 <footer class="footer">
   <div class="footer-grid">
     <div class="footer-col">
       <a href="index.html" class="brand" style="margin-bottom:18px">
-        <img src="assets/logo.svg" alt="AT" data-brand-logo>
+        <img src="assets/logo.png" alt="AT" data-brand-logo>
         <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
       </a>
       <p data-i18n="foot.tagline">девайсы для тех, кто играет на победу.</p>
@@ -162,7 +180,7 @@
     </div>
     <div class="footer-col">
       <div class="ft" data-i18n="foot.contact">связь</div>
-      <div class="links" id="footContacts"></div>
+      <div class="links" id="footContacts"></div><!-- телефон/WhatsApp/Telegram из настроек вставит JS -->
     </div>
   </div>
   <div class="footer-bottom">
@@ -171,6 +189,12 @@
   </div>
 </footer>
 
+<!-- ============================================================
+     СКРИПТ СТРАНИЦЫ: заполняет динамические блоки данными.
+     window.AT.ready(...) ждёт, пока app.js загрузит каталог, затем:
+       • подставляет логотип, • фото флагмана в герой,
+       • рисует популярные товары и категории, • контакты в подвал.
+     ============================================================ -->
 <script>
 window.AT.ready(function(){
   var AT=window.AT, S=AT.Store;
@@ -181,11 +205,18 @@ window.AT.ready(function(){
 
   var products=S.products(), cats=S.categories(), st=S.settings();
 
-  // герой: фото флагмана (p1) если есть
+  // фото баннера: отдельное из настроек, иначе — фото товара p1
   var flagship=products.filter(function(p){return p.id==='p1';})[0]||products[0];
-  if(flagship && AT.firstImg(flagship)){
-    document.getElementById('heroImg').innerHTML='<img src="'+AT.esc(AT.firstImg(flagship))+'" alt="'+AT.esc(flagship.name)+'">';
+  var heroSrc = st.heroImage || (flagship && AT.firstImg(flagship)) || '';
+  if(heroSrc){
+    document.getElementById('heroImg').innerHTML='<img src="'+AT.esc(heroSrc)+'" alt="'+AT.esc((flagship&&flagship.name)||'AT Cybersport')+'">';
   }
+  // тексты баннера из настроек (правятся в админке: Настройки → Баннер)
+  if(st.heroTitle!=null)   document.getElementById('heroTitle').textContent=st.heroTitle;
+  if(st.heroTagline!=null) document.getElementById('heroTagline').textContent=st.heroTagline;
+  var hd=document.getElementById('heroDesc');
+  if(st.heroDesc!=null){ hd.textContent=st.heroDesc; }
+  hd.style.display=(hd.textContent.trim()?'':'none');
 
   // популярные — первые 6
   var pop=products.slice(0,6);

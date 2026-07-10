@@ -1,4 +1,16 @@
 <!DOCTYPE html>
+<!-- ============================================================
+     АДМИН-ПАНЕЛЬ (admin.html)
+     Две части:
+       • #loginScreen — экран входа по паролю;
+       • #adminPanel  — сама панель с вкладками: товары, категории,
+                        заказы, настройки.
+     Внизу — два модальных окна-редактора: товара (#editorModal) и
+     категории (#catEditorModal). Вся логика — в assets/admin.js.
+     ВНИМАНИЕ по безопасности: пароль проверяется в браузере, это не
+     настоящая защита. Не выкладывайте admin.html в открытый доступ
+     без защиты хостинга — см. README, раздел «Безопасность».
+     ============================================================ -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -8,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="icon" href="assets/logo.svg">
+<link rel="icon" href="assets/logo.png">
 <link rel="stylesheet" href="assets/styles.css">
 <style>
   body{background:var(--bg);}
@@ -109,20 +121,20 @@
 <!-- LOGIN -->
 <div id="loginScreen" class="login-screen">
   <div class="login-box">
-    <img src="assets/logo.svg" alt="AT">
+    <img src="assets/logo.png" alt="AT">
     <h1>админ-панель</h1>
     <p>AT Cybersport — управление магазином</p>
     <input type="password" id="loginPass" placeholder="Пароль" autocomplete="current-password">
     <button id="loginBtn">Войти</button>
     <div class="login-err" id="loginErr">Неверный пароль</div>
-    <div class="login-hint">пароль по умолчанию: atadmin · смените в настройках</div>
+    <div class="login-hint"></div>
   </div>
 </div>
 
 <!-- PANEL -->
 <div id="adminPanel" style="display:none">
   <div class="a-top">
-    <a href="index.html" class="brand"><img src="assets/logo.svg" alt="AT" style="width:32px;height:32px"><span class="bw"><b>AT</b><span>ADMIN</span></span></a>
+    <a href="index.html" class="brand"><img src="assets/logo.png" alt="AT" style="width:32px;height:32px"><span class="bw"><b>AT</b><span>ADMIN</span></span></a>
     <button class="a-logout" id="logoutBtn">Выйти</button>
   </div>
   <div class="a-shell">
@@ -138,6 +150,12 @@
     <div class="tab-panel" id="panel-categories" style="display:none">
       <div class="panel-head"><h2>категории</h2><button class="a-add" id="addCatBtn">+ Добавить категорию</button></div>
       <div id="categoriesList"></div>
+    </div>
+
+    <!-- ДРАЙВЕРА -->
+    <div class="tab-panel" id="panel-drivers" style="display:none">
+      <div class="panel-head"><h2>драйвера</h2><button class="a-add" id="addDriverBtn">+ Добавить драйвер</button></div>
+      <div id="driversList"></div>
     </div>
 
     <!-- ЗАКАЗЫ -->
@@ -174,6 +192,18 @@
     <div class="a-modal-foot">
       <button class="a-btn" id="catCancel">Отмена</button>
       <button class="a-btn primary" id="catSave">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- РЕДАКТОР ДРАЙВЕРА -->
+<div class="a-modal" id="drvEditorModal">
+  <div class="a-modal-box">
+    <h3 id="drvEditorTitle">Драйвер</h3>
+    <div id="drvEditorBody"></div>
+    <div class="a-modal-foot">
+      <button class="a-btn" id="drvCancel">Отмена</button>
+      <button class="a-btn primary" id="drvSave">Сохранить драйвер</button>
     </div>
   </div>
 </div>

@@ -1,4 +1,12 @@
 <!DOCTYPE html>
+<!-- ============================================================
+     КАРТОЧКА ТОВАРА (product.html)
+     Открывается по адресу product.html?id=НОМЕР_ТОВАРА.
+     Скрипт внизу читает id из адреса, находит товар в данных и
+     полностью собирает страницу внутри <main id="productRoot">:
+     галерею фото, цену/скидку, цвета, количество, кнопку «в корзину»,
+     таблицу характеристик, комплектацию и блок «с этим берут».
+     ============================================================ -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -7,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="icon" href="assets/logo.svg">
+<link rel="icon" href="assets/logo.png"><!-- положи свой файл logo.png (латиницей!) в папку assets -->
 <link rel="stylesheet" href="assets/styles.css">
 <script src="assets/app.js"></script>
 <script src="assets/ui.js"></script>
@@ -18,10 +26,11 @@
 
 <nav class="nav">
   <a href="index.html" class="brand">
-    <img src="assets/logo.svg" alt="AT" data-brand-logo>
+    <img src="assets/logo.png" alt="AT" data-brand-logo>
     <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
   </a>
   <div class="nav-links">
+    <a href="drivers.html" data-i18n="nav.drivers">драйвера</a>
     <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
     <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
     <a href="index.html#about" data-i18n="nav.about">команда</a>
@@ -33,6 +42,7 @@
   </div>
 </nav>
 <div class="mobile-menu" id="mobileMenu">
+  <a href="drivers.html" data-i18n="nav.drivers">драйвера</a>
   <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
   <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
   <a href="index.html#about" data-i18n="nav.about">команда</a>
@@ -40,12 +50,13 @@
   <div class="lang mm-lang" data-langswitch></div>
 </div>
 
-<main class="page" id="productRoot"><!-- рендер из JS --></main>
+<!-- контейнер, который целиком заполняет скрипт данными товара -->
+<main class="page" id="productRoot"><!-- содержимое строится в JS ниже --></main>
 
 <footer class="footer">
   <div class="footer-grid" style="grid-template-columns:1fr auto">
     <a href="index.html" class="brand">
-      <img src="assets/logo.svg" alt="AT" data-brand-logo>
+      <img src="assets/logo.png" alt="AT" data-brand-logo>
       <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
     </a>
     <span style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--dim)">© 2026 AT CYBERSPORT</span>

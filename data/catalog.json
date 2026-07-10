@@ -1,7 +1,7 @@
 {
   "__at": "AT_CYBERSPORT_CATALOG",
   "version": 1,
-  "publishedAt": "2026-07-01T17:17:18.478Z",
+  "publishedAt": "2026-07-05T21:21:47.131Z",
   "products": [
     {
       "id": "p1",
@@ -591,6 +591,44 @@
       }
     }
   ],
+  "drivers": [
+    {
+      "id": "d1",
+      "name": "AT Control Center",
+      "device": "AT Stallion Pro",
+      "version": "2.4.1",
+      "os": "Windows 10/11",
+      "size": "48 МБ",
+      "url": "",
+      "file": "",
+      "updated": "2026-06-01",
+      "note": "Настройка DPI, макросов и подсветки."
+    },
+    {
+      "id": "d2",
+      "name": "AT Control Center",
+      "device": "AT Cavalry TKL",
+      "version": "2.4.1",
+      "os": "Windows 10/11",
+      "size": "48 МБ",
+      "url": "",
+      "file": "",
+      "updated": "2026-06-01",
+      "note": "Rapid trigger, ремап клавиш, профили."
+    },
+    {
+      "id": "d3",
+      "name": "AT Audio Suite",
+      "device": "AT Gallop",
+      "version": "1.8.0",
+      "os": "Windows 10/11",
+      "size": "32 МБ",
+      "url": "",
+      "file": "",
+      "updated": "2026-05-12",
+      "note": "Эквалайзер и настройка микрофона."
+    }
+  ],
   "settings": {
     "currency": "TMT",
     "city": "Ашхабад, Туркменистан",
@@ -598,6 +636,10 @@
     "whatsapp": "",
     "telegram": "",
     "freeShipping": 5000,
-    "logo": ""
+    "logo": "",
+    "heroImage": "",
+    "heroTitle": "PRO SERIES",
+    "heroTagline": "играй на полную",
+    "heroDesc": "Мыши, клавиатуры и гарнитуры AT Cybersport — точность без компромиссов."
   }
 }

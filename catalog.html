@@ -1,4 +1,10 @@
 <!DOCTYPE html>
+<!-- ============================================================
+     КАТАЛОГ (catalog.html)
+     Показывает все товары сеткой + фильтр по категориям (чипы сверху).
+     Всё, что видно, рисует скрипт внизу из данных (app.js/catalog.json).
+     Параметр ?cat=ID в адресе открывает сразу нужную категорию.
+     ============================================================ -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -7,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="icon" href="assets/logo.svg">
+<link rel="icon" href="assets/logo.png"><!-- положи свой файл logo.png (латиницей!) в папку assets -->
 <link rel="stylesheet" href="assets/styles.css">
 <script src="assets/app.js"></script>
 <script src="assets/ui.js"></script>
@@ -18,10 +24,11 @@
 
 <nav class="nav">
   <a href="index.html" class="brand">
-    <img src="assets/logo.svg" alt="AT" data-brand-logo>
+    <img src="assets/logo.png" alt="AT" data-brand-logo>
     <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
   </a>
   <div class="nav-links">
+    <a href="drivers.html" data-i18n="nav.drivers">драйвера</a>
     <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
     <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
     <a href="index.html#about" data-i18n="nav.about">команда</a>
@@ -33,6 +40,7 @@
   </div>
 </nav>
 <div class="mobile-menu" id="mobileMenu">
+  <a href="drivers.html" data-i18n="nav.drivers">драйвера</a>
   <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
   <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
   <a href="index.html#about" data-i18n="nav.about">команда</a>
@@ -43,18 +51,20 @@
 <main class="page">
 <header class="cat-header">
   <div class="wrap-in">
-    <div class="eyebrow" data-reveal><span data-i18n="catalog.eyebrow">каталог</span> · <span id="posCount">0</span> <span data-i18n="catalog.positions">позиций</span></div>
-    <h1 data-reveal style="margin-top:14px"><span data-i18n="catalog.title">снаряжение</span><sup id="posSup">( 0 )</sup></h1>
-    <p data-reveal data-i18n="catalog.desc">Полная линейка девайсов AT Cybersport. Карточки обновляются администратором магазина.</p>
+    <!-- огромный заголовок по центру со счётчиком товаров (как у LUNACY) -->
+    <h1 data-reveal><span data-i18n="catalog.title">каталог</span><sup id="posSup">( 0 )</sup></h1>
   </div>
 </header>
 
+<!-- панель фильтров: чипы категорий + строка поиска -->
 <div class="filters">
   <div class="row" id="filterRow"></div>
+  <div class="cat-search"><input id="catSearch" type="search" data-i18n-ph="search.ph" placeholder="поиск по каталогу…"></div>
 </div>
 
+<!-- основная область: сетка товаров (#catalogGrid) + сообщение о пустой категории -->
 <div class="catalog-main">
-  <div class="catalog-grid" id="catalogGrid"></div>
+  <div class="catalog-grid" id="catalogGrid"></div><!-- карточки товаров вставляет JS -->
   <div class="empty" id="emptyState" style="display:none" data-i18n="empty">в этой категории пока пусто</div>
 </div>
 </main>
@@ -62,7 +72,7 @@
 <footer class="footer">
   <div class="footer-grid" style="grid-template-columns:1fr auto">
     <a href="index.html" class="brand">
-      <img src="assets/logo.svg" alt="AT" data-brand-logo>
+      <img src="assets/logo.png" alt="AT" data-brand-logo>
       <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
     </a>
     <span style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--dim)">© 2026 AT CYBERSPORT</span>
@@ -78,8 +88,7 @@ window.AT.ready(function(){
   var params=new URLSearchParams(location.search);
   var active=params.get('cat')||'all';
 
-  // счётчики
-  document.getElementById('posCount').textContent=products.length;
+  // счётчик товаров в заголовке
   document.getElementById('posSup').textContent='( '+products.length+' )';
 
   // чипы фильтра
@@ -93,27 +102,38 @@ window.AT.ready(function(){
   var grid=document.getElementById('catalogGrid');
   grid.innerHTML=products.map(function(p){return AT.ui.catalogCard(p);}).join('');
   AT.ui.wireCatalogAdd(grid);
+  // стаггер: каждая карточка появляется чуть позже соседней (по столбцам)
+  grid.querySelectorAll('.card').forEach(function(card,i){ card.setAttribute('data-delay',(i%3)*70); });
 
   var empty=document.getElementById('emptyState');
-  function apply(f){
+  var search=document.getElementById('catSearch');
+  // фильтр = выбранная категория + строка поиска (по названию товара)
+  function apply(f,animate){
+    var q=(search.value||'').trim().toLowerCase();
     var shown=0;
     grid.querySelectorAll('.card').forEach(function(card){
-      var on=(f==='all'||card.getAttribute('data-cat')===f);
+      var byCat=(f==='all'||card.getAttribute('data-cat')===f);
+      var name=(card.querySelector('.cname')||{}).textContent||'';
+      var byName=!q || name.toLowerCase().indexOf(q)>=0;
+      var on=byCat&&byName;
       card.style.display=on?'':'none';
-      if(on){ shown++; card.style.opacity='0'; card.style.transform='translateY(16px)'; requestAnimationFrame(function(){ card.classList.add('in'); card.style.opacity=''; card.style.transform=''; }); }
+      if(on){ shown++;
+        if(animate){ card.style.opacity='0'; card.style.transform='translateY(16px)'; requestAnimationFrame(function(){ card.classList.add('in'); card.style.opacity=''; card.style.transform=''; }); }
+      }
     });
     empty.style.display=shown?'none':'block';
   }
+  search.addEventListener('input',function(){ apply(active,false); });
   row.querySelectorAll('[data-filter]').forEach(function(chip){
     chip.onclick=function(){
       row.querySelectorAll('.chip').forEach(function(c){c.classList.remove('on');});
       chip.classList.add('on');
-      active=chip.getAttribute('data-filter');
-      apply(active);
+      active=chip.getAttribute("data-filter");
+      apply(active,true);
       history.replaceState(null,'', active==='all'?'catalog.html':'catalog.html?cat='+active);
     };
   });
-  apply(active);
+  apply(active,false);
 });
 </script>
 </body>

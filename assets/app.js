@@ -8,7 +8,7 @@
 /* -------------------- КЛЮЧИ ХРАНИЛИЩА -------------------- */
 var K = {
   products:'at_products', categories:'at_categories', settings:'at_settings',
-  orders:'at_orders', cart:'at_cart', lang:'at_lang'
+  orders:'at_orders', cart:'at_cart', lang:'at_lang', drivers:'at_drivers'
 };
 
 /* -------------------- ДАННЫЕ ПО УМОЛЧАНИЮ -------------------- */
@@ -81,6 +81,12 @@ var DEFAULT_PRODUCTS = [
     inBox:['Коврик AT Turf Speed'], images:[] }
 ];
 
+var DEFAULT_DRIVERS = [
+  { id:'d1', name:'AT Control Center', device:'AT Stallion Pro', version:'2.4.1', os:'Windows 10/11', size:'48 МБ', url:'', file:'', updated:'2026-06-01', note:'Настройка DPI, макросов и подсветки.' },
+  { id:'d2', name:'AT Control Center', device:'AT Cavalry TKL', version:'2.4.1', os:'Windows 10/11', size:'48 МБ', url:'', file:'', updated:'2026-06-01', note:'Rapid trigger, ремап клавиш, профили.' },
+  { id:'d3', name:'AT Audio Suite', device:'AT Gallop', version:'1.8.0', os:'Windows 10/11', size:'32 МБ', url:'', file:'', updated:'2026-05-12', note:'Эквалайзер и настройка микрофона.' }
+];
+
 var DEFAULT_SETTINGS = {
   currency:'TMT',
   city:'Ашхабад, Туркменистан',
@@ -88,14 +94,22 @@ var DEFAULT_SETTINGS = {
   whatsapp:'',            // номер для WhatsApp в межд. формате без + (напр. 99365000000)
   telegram:'',            // username без @ или номер
   freeShipping:5000,
-  adminPass:'atadmin',    // пароль админ-панели (смените!)
-  logo:''                 // data:URL если админ загрузил свой логотип
+  logo:'',                // data:URL если админ загрузил свой логотип
+  heroImage:'',           // отдельное фото для баннера (если пусто — берётся фото товара p1)
+  /* тексты первого экрана (баннера) — правятся в админке: Настройки → Баннер */
+  heroTitle:'PRO SERIES',
+  heroTagline:'играй на полную',
+  heroDesc:'Мыши, клавиатуры и гарнитуры AT Cybersport — точность без компромиссов.'
+  /* adminPass намеренно НЕ хранится здесь: app.js публичный (грузится на всех
+     страницах), поэтому пароль в нём был бы виден в исходном коде.
+     Пароль по умолчанию задаётся в admin.js и сохраняется только в localStorage
+     администратора после первого входа/смены. */
 };
 
 /* -------------------- ПЕРЕВОДЫ -------------------- */
 var I18N = {
   ru:{
-    'nav.catalog':'каталог','nav.tech':'технологии','nav.about':'команда','nav.support':'поддержка',
+    'nav.catalog':'каталог','nav.tech':'технологии','nav.about':'команда','nav.drivers':'драйвера','nav.support':'поддержка',
     'nav.cart':'корзина','nav.shop':'магазин',
     'hero.kicker':'AT CYBERSPORT','hero.sub':'/ 54 г · 8000 Гц','hero.desc':'Теперь в титановом корпусе.','hero.cta':'подробнее',
     'marq.mice':'мыши','marq.keyboards':'клавиатуры','marq.headsets':'гарнитуры','marq.pads':'коврики',
@@ -109,7 +123,7 @@ var I18N = {
     'tech.4t':'95 часов','tech.4d':'почти пять турнирных дней без подзарядки.',
     'foot.tagline':'девайсы для тех, кто играет на победу.','foot.catalog':'каталог','foot.company':'компания','foot.contact':'связь',
     'foot.support':'поддержка','foot.copyright':'сделано для победы',
-    'catalog.eyebrow':'каталог','catalog.positions':'позиций','catalog.title':'снаряжение',
+    'catalog.eyebrow':'каталог','catalog.positions':'позиций','catalog.title':'каталог',
     'catalog.desc':'Полная линейка девайсов AT Cybersport. Карточки обновляются администратором магазина.',
     'filter.all':'всё','empty':'в этой категории пока пусто',
     'crumb.home':'главная','p.flagship':'флагман','p.color':'цвет','p.specs':'характеристики','p.fullspec':'полная спецификация',
@@ -122,10 +136,13 @@ var I18N = {
     'order.wa':'Отправить в WhatsApp','order.tg':'Отправить в Telegram','order.copy':'Скопировать заказ',
     'order.err.name':'Введите имя','order.err.phone':'Введите номер телефона',
     'order.done':'Заказ оформлен','order.doneSub':'Отправьте его менеджеру удобным способом ниже — он свяжется с вами.',
-    'order.copied':'Скопировано','order.close':'Закрыть'
+    'order.copied':'Скопировано','order.close':'Закрыть',
+    'trust.1':'доставка по Ашхабаду 1–3 дня','trust.2':'гарантия 2 года','trust.3':'оплата при получении','trust.4':'поддержка в WhatsApp',
+    'search.ph':'поиск по каталогу…',
+    'drv.title':'драйвера','drv.desc':'Программы и драйверы для устройств AT Cybersport. Выберите своё устройство и скачайте актуальную версию.','drv.device':'устройство','drv.version':'версия','drv.os':'система','drv.size':'размер','drv.updated':'обновлён','drv.download':'скачать','drv.empty':'драйверов пока нет','drv.search':'поиск драйвера…'
   },
   tk:{
-    'nav.catalog':'katalog','nav.tech':'tehnologiýalar','nav.about':'topar','nav.support':'goldaw',
+    'nav.catalog':'katalog','nav.tech':'tehnologiýalar','nav.about':'topar','nav.drivers':'draýwerler','nav.support':'goldaw',
     'nav.cart':'sebet','nav.shop':'dükan',
     'hero.kicker':'AT CYBERSPORT','hero.sub':'/ 54 g · 8000 Gs','hero.desc':'Indi titan korpusda.','hero.cta':'giňişleýin',
     'marq.mice':'syçanlar','marq.keyboards':'klawiaturalar','marq.headsets':'nauşnikler','marq.pads':'halyçalar',
@@ -139,7 +156,7 @@ var I18N = {
     'tech.4t':'95 sagat','tech.4d':'zarýadsyz bäş ýaryş güni.',
     'foot.tagline':'ýeňiş üçin oýnaýanlar üçin enjamlar.','foot.catalog':'katalog','foot.company':'kompaniýa','foot.contact':'aragatnaşyk',
     'foot.support':'goldaw','foot.copyright':'ýeňiş üçin ýasaldy',
-    'catalog.eyebrow':'katalog','catalog.positions':'haryt','catalog.title':'enjamlar',
+    'catalog.eyebrow':'katalog','catalog.positions':'haryt','catalog.title':'katalog',
     'catalog.desc':'AT Cybersport enjamlarynyň doly hatary. Kartlar dükanyň administratory tarapyndan täzelenýär.',
     'filter.all':'hemmesi','empty':'bu kategoriýada haryt ýok',
     'crumb.home':'baş sahypa','p.flagship':'flagman','p.color':'reňk','p.specs':'aýratynlyklar','p.fullspec':'doly aýratynlyklar',
@@ -152,10 +169,13 @@ var I18N = {
     'order.wa':'WhatsApp arkaly','order.tg':'Telegram arkaly','order.copy':'Sargydy göçürmek',
     'order.err.name':'Adyňyzy giriziň','order.err.phone':'Telefon belgiňizi giriziň',
     'order.done':'Sargyt kabul edildi','order.doneSub':'Aşakdaky amatly usul bilen menejere iberiň — ol siziň bilen habarlaşar.',
-    'order.copied':'Göçürildi','order.close':'Ýapmak'
+    'order.copied':'Göçürildi','order.close':'Ýapmak',
+    'trust.1':'Aşgabat boýunça eltip berme 1–3 gün','trust.2':'kepillik 2 ýyl','trust.3':'alanda töleg','trust.4':'WhatsApp goldawy',
+    'search.ph':'katalogda gözleg…',
+    'drv.title':'draýwerler','drv.desc':'AT Cybersport enjamlary üçin programmalar we draýwerler. Enjamyňyzy saýlaň we soňky wersiýany ýükläň.','drv.device':'enjam','drv.version':'wersiýa','drv.os':'ulgam','drv.size':'ölçeg','drv.updated':'täzelendi','drv.download':'ýükle','drv.empty':'draýwer ýok','drv.search':'draýwer gözle…'
   },
   en:{
-    'nav.catalog':'catalog','nav.tech':'technology','nav.about':'team','nav.support':'support',
+    'nav.catalog':'catalog','nav.tech':'technology','nav.about':'team','nav.drivers':'drivers','nav.support':'support',
     'nav.cart':'cart','nav.shop':'shop',
     'hero.kicker':'AT CYBERSPORT','hero.sub':'/ 54 g · 8000 Hz','hero.desc':'Now in a titanium shell.','hero.cta':'details',
     'marq.mice':'mice','marq.keyboards':'keyboards','marq.headsets':'headsets','marq.pads':'pads',
@@ -169,7 +189,7 @@ var I18N = {
     'tech.4t':'95 hours','tech.4d':'almost five tournament days on a charge.',
     'foot.tagline':'gear for those who play to win.','foot.catalog':'catalog','foot.company':'company','foot.contact':'contact',
     'foot.support':'support','foot.copyright':'built to win',
-    'catalog.eyebrow':'catalog','catalog.positions':'items','catalog.title':'gear',
+    'catalog.eyebrow':'catalog','catalog.positions':'items','catalog.title':'catalog',
     'catalog.desc':'The full AT Cybersport lineup. Cards are updated by the store administrator.',
     'filter.all':'all','empty':'nothing in this category yet',
     'crumb.home':'home','p.flagship':'flagship','p.color':'color','p.specs':'specs','p.fullspec':'full specification',
@@ -182,7 +202,10 @@ var I18N = {
     'order.wa':'Send via WhatsApp','order.tg':'Send via Telegram','order.copy':'Copy order',
     'order.err.name':'Enter your name','order.err.phone':'Enter your phone number',
     'order.done':'Order placed','order.doneSub':'Send it to a manager using any option below — they will contact you.',
-    'order.copied':'Copied','order.close':'Close'
+    'order.copied':'Copied','order.close':'Close',
+    'trust.1':'delivery in Ashgabat 1–3 days','trust.2':'2-year warranty','trust.3':'pay on delivery','trust.4':'WhatsApp support',
+    'search.ph':'search the catalog…',
+    'drv.title':'drivers','drv.desc':'Software and drivers for AT Cybersport devices. Pick your device and download the latest version.','drv.device':'device','drv.version':'version','drv.os':'system','drv.size':'size','drv.updated':'updated','drv.download':'download','drv.empty':'no drivers yet','drv.search':'search driver…'
   }
 };
 
@@ -215,11 +238,13 @@ var Store = {
   saveSettings:function(s){ write(K.settings, s); },
   orders:function(){ return read(K.orders, []); },
   saveOrders:function(o){ write(K.orders, o); },
+  drivers:function(){ return read(K.drivers, null) || (FETCHED&&FETCHED.drivers) || DEFAULT_DRIVERS.slice(); },
+  saveDrivers:function(d){ write(K.drivers, d); },
   cart:function(){ return read(K.cart, []); },
   saveCart:function(c){ write(K.cart, c); },
   lang:function(){ return read(K.lang, 'ru'); },
   saveLang:function(l){ write(K.lang, l); },
-  reset:function(){ [K.products,K.categories,K.settings,K.orders].forEach(function(k){ localStorage.removeItem(k); }); }
+  reset:function(){ [K.products,K.categories,K.settings,K.orders,K.drivers].forEach(function(k){ localStorage.removeItem(k); }); }
 };
 
 /* -------------------- ХЕЛПЕРЫ -------------------- */
@@ -229,7 +254,7 @@ function catName(cat){ if(!cat) return ''; return (cat.name && cat.name[lang]) |
 function catById(id){ return Store.categories().filter(function(c){return c.id===id;})[0]; }
 function money(n){ var s = Store.settings(); return (Number(n)||0).toLocaleString('ru-RU') + ' ' + s.currency; }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
-function logoSrc(){ var s = Store.settings(); return s.logo || 'assets/logo.svg'; }
+function logoSrc(){ var s = Store.settings(); return s.logo || 'assets/logo.png'; }
 function firstImg(prod){ return (prod.images && prod.images[0]) || ''; }
 
 /* -------------------- КОРЗИНА -------------------- */
@@ -375,6 +400,18 @@ function copyText(txt){
 }
 
 /* -------------------- ИНЪЕКЦИЯ ОБЩЕГО UI (drawer + modal) -------------------- */
+function injectWhatsAppFab(){
+  var s=Store.settings();
+  var num=(s.whatsapp||'').replace(/\D/g,'');
+  if(!num || document.getElementById('adminPanel') || document.getElementById('waFab')) return;
+  var a=document.createElement('a');
+  a.id='waFab'; a.className='wa-fab'; a.target='_blank'; a.rel='noopener';
+  a.href='https://wa.me/'+num;
+  a.setAttribute('aria-label','WhatsApp');
+  a.innerHTML='<svg viewBox="0 0 32 32" width="26" height="26" fill="#052e15"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.6.8 5 2.2 7L4.5 28l6.2-1.6c1.9 1 4 1.6 6.3 1.6 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 22c-2 0-3.9-.6-5.5-1.6l-.4-.2-3.7 1 1-3.6-.3-.4C5.7 18.6 5 16.9 5 15 5 9 9.9 4 16 4s11 5 11 11-4.9 10-11 10zm5.6-7.4c-.3-.2-1.8-.9-2.1-1-.3-.1-.5-.2-.7.2-.2.3-.8 1-1 1.2-.2.2-.4.2-.7.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.6c.2-.2.2-.4.3-.6.1-.2 0-.4 0-.6-.1-.2-.7-1.7-1-2.3-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.1 1.1-1.1 2.7s1.2 3.1 1.3 3.3c.2.2 2.3 3.5 5.5 4.9.8.3 1.4.5 1.9.7.8.2 1.5.2 2.1.1.6-.1 1.8-.7 2.1-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.6-.4z"/></svg>';
+  document.body.appendChild(a);
+}
+
 function injectSharedUI(){
   if(document.getElementById('cartDrawer')) return;
   var html =
@@ -428,6 +465,7 @@ function injectSharedUI(){
 function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent = t(el.getAttribute('data-i18n')); });
   document.querySelectorAll('[data-i18n-html]').forEach(function(el){ el.innerHTML = t(el.getAttribute('data-i18n-html')); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(function(el){ el.setAttribute('placeholder', t(el.getAttribute('data-i18n-ph'))); });
   document.documentElement.lang = lang;
 }
 function buildLangSwitch(container, mobile){
@@ -482,7 +520,7 @@ function wireTilt(){
 
 /* -------------------- ЭКСПОРТ В ГЛОБАЛ -------------------- */
 window.AT = {
-  Store:Store, I18N:I18N, DEFAULT_CATEGORIES:DEFAULT_CATEGORIES, DEFAULT_PRODUCTS:DEFAULT_PRODUCTS, DEFAULT_SETTINGS:DEFAULT_SETTINGS,
+  Store:Store, I18N:I18N, DEFAULT_CATEGORIES:DEFAULT_CATEGORIES, DEFAULT_PRODUCTS:DEFAULT_PRODUCTS, DEFAULT_SETTINGS:DEFAULT_SETTINGS, DEFAULT_DRIVERS:DEFAULT_DRIVERS,
   t:t, lang:function(){return lang;}, catName:catName, catById:catById, money:money, esc:esc, logoSrc:logoSrc, firstImg:firstImg,
   addToCart:addToCart, openCart:openCart, closeCart:closeCart, renderCart:renderCart, updateCartBadges:updateCartBadges,
   applyI18n:applyI18n, init:init
@@ -494,6 +532,7 @@ function ready(cb){ if(_ready) cb(); else _readyCbs.push(cb); }
 function init(){
   loadCatalog(function(){
     injectSharedUI();
+    injectWhatsAppFab();
     applyI18n();
     wireNav();
     updateCartBadges();

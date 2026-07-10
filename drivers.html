@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     ДРАЙВЕРА (drivers.html)
+     Список драйверов/ПО для устройств. Управляется в админке
+     (вкладка «Драйвера»). Скрипт внизу рисует таблицу из данных.
+     ============================================================ -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Драйвера — AT Cybersport</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/logo.png">
+<link rel="stylesheet" href="assets/styles.css">
+<script src="assets/app.js"></script>
+<script src="assets/ui.js"></script>
+</head>
+<body>
+<div class="at-glows"><i></i><i></i></div>
+<div class="at-grain"></div>
+
+<nav class="nav">
+  <a href="index.html" class="brand">
+    <img src="assets/logo.png" alt="AT" data-brand-logo>
+    <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="drivers.html" data-i18n="nav.drivers">драйвера</a>
+    <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
+    <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
+    <a href="index.html#about" data-i18n="nav.about">команда</a>
+  </div>
+  <div class="nav-right">
+    <div class="lang" data-langswitch></div>
+    <button class="cart-btn" data-open-cart><span class="cart-label" data-i18n="nav.cart">корзина</span> · <span data-cart-count>0</span></button>
+    <button class="burger" id="burger" aria-label="Меню"><i></i><i></i><i></i></button>
+  </div>
+</nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="drivers.html" data-i18n="nav.drivers">драйвера</a>
+  <a href="catalog.html" data-i18n="nav.catalog">каталог</a>
+  <a href="index.html#tech" data-i18n="nav.tech">технологии</a>
+  <a href="index.html#about" data-i18n="nav.about">команда</a>
+  <a href="#" data-open-cart data-i18n="nav.cart">корзина</a>
+  <div class="lang mm-lang" data-langswitch></div>
+</div>
+
+<main class="page">
+<header class="cat-header">
+  <div class="wrap-in">
+    <h1 data-reveal><span data-i18n="drv.title">драйвера</span><sup id="drvCount">( 0 )</sup></h1>
+    <p data-reveal data-i18n="drv.desc">Программы и драйверы для устройств AT Cybersport.</p>
+  </div>
+</header>
+
+<div class="filters">
+  <div class="cat-search"><input id="drvSearch" type="search" data-i18n-ph="drv.search" placeholder="поиск драйвера…"></div>
+</div>
+
+<div class="catalog-main">
+  <div class="drivers-wrap wrap" id="driversWrap"></div>
+  <div class="empty" id="drvEmpty" style="display:none" data-i18n="drv.empty">драйверов пока нет</div>
+</div>
+</main>
+
+<footer class="footer">
+  <div class="footer-grid" style="grid-template-columns:1fr auto">
+    <a href="index.html" class="brand">
+      <img src="assets/logo.png" alt="AT" data-brand-logo>
+      <span class="bw"><b>AT</b><span>CYBERSPORT</span></span>
+    </a>
+    <span style="font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--dim)">© 2026 AT CYBERSPORT</span>
+  </div>
+</footer>
+
+<script>
+window.AT.ready(function(){
+  var AT=window.AT, S=AT.Store, esc=AT.esc, t=AT.t;
+  document.querySelectorAll('[data-brand-logo]').forEach(function(i){ i.src=AT.logoSrc(); });
+
+  var drivers=S.drivers();
+  document.getElementById('drvCount').textContent='( '+drivers.length+' )';
+  var wrap=document.getElementById('driversWrap');
+  var empty=document.getElementById('drvEmpty');
+
+  function fileHref(d){ return d.url || d.file || ''; }
+  function cardHTML(d){
+    var href=fileHref(d);
+    var dl = href
+      ? '<a class="drv-dl" href="'+esc(href)+'"'+(d.file&&d.fileName?(' download="'+esc(d.fileName)+'"'):' target="_blank" rel="noopener"')+'>'+t('drv.download')+' ↓</a>'
+      : '<span class="drv-dl off">—</span>';
+    return '<div class="drv-card" data-reveal data-name="'+esc((d.name+' '+d.device).toLowerCase())+'">'+
+      '<div class="drv-main">'+
+        '<div class="drv-name">'+esc(d.name)+'</div>'+
+        '<div class="drv-device">'+t('drv.device')+': '+esc(d.device||'—')+'</div>'+
+        (d.note?'<div class="drv-note">'+esc(d.note)+'</div>':'')+
+      '</div>'+
+      '<div class="drv-meta">'+
+        '<span><b>'+esc(d.version||'—')+'</b>'+t('drv.version')+'</span>'+
+        '<span><b>'+esc(d.os||'—')+'</b>'+t('drv.os')+'</span>'+
+        '<span><b>'+esc(d.size||'—')+'</b>'+t('drv.size')+'</span>'+
+        '<span><b>'+esc(d.updated||'—')+'</b>'+t('drv.updated')+'</span>'+
+      '</div>'+
+      dl+
+    '</div>';
+  }
+  wrap.innerHTML=drivers.map(cardHTML).join('');
+  empty.style.display=drivers.length?'none':'block';
+
+  var search=document.getElementById('drvSearch');
+  search.addEventListener('input',function(){
+    var q=(search.value||'').trim().toLowerCase(), shown=0;
+    wrap.querySelectorAll('.drv-card').forEach(function(c){
+      var on=!q||c.getAttribute('data-name').indexOf(q)>=0;
+      c.style.display=on?'':'none'; if(on) shown++;
+    });
+    empty.style.display=shown?'none':'block';
+  });
+});
+</script>
+</body>
+</html>

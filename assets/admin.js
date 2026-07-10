@@ -7,6 +7,14 @@
 'use strict';
 var AT=window.AT, S=AT.Store, esc=AT.esc, money=AT.money;
 
+/* Пароль админ-панели по умолчанию. Используется, только пока администратор
+   не задал свой (после этого свой пароль хранится в localStorage этого
+   браузера). ВАЖНО: это лишь «замок от честных людей» — настоящую защиту
+   даёт хостинг (см. README, раздел о безопасности) или отказ от загрузки
+   admin.html на сервер вовсе. Смените это значение перед публикацией. */
+var ADMIN_DEFAULT_PASS='atadmin';
+function adminPass(){ var s=S.settings(); return s.adminPass || ADMIN_DEFAULT_PASS; }
+
 /* ------- утилиты ------- */
 function $(id){ return document.getElementById(id); }
 function el(tag,cls,html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
@@ -44,10 +52,9 @@ function storageUsage(){
    ЛОГИН
    ============================================================ */
 function initLogin(){
-  var s=S.settings();
   $('loginBtn').onclick=function(){
     var pass=$('loginPass').value;
-    if(pass===s.adminPass){ sessionStorage.setItem('at_admin_ok','1'); showPanel(); }
+    if(pass===adminPass()){ sessionStorage.setItem('at_admin_ok','1'); showPanel(); }
     else{ $('loginErr').style.display='block'; }
   };
   $('loginPass').addEventListener('keydown',function(e){ if(e.key==='Enter') $('loginBtn').click(); });
@@ -63,7 +70,7 @@ function showPanel(){
    ВКЛАДКИ
    ============================================================ */
 function buildTabs(){
-  var tabs=[['products','Товары'],['categories','Категории'],['orders','Заказы'],['settings','Настройки']];
+  var tabs=[['products','Товары'],['categories','Категории'],['drivers','Драйвера'],['orders','Заказы'],['settings','Настройки']];
   var nav=$('tabNav');
   nav.innerHTML=tabs.map(function(t,i){ return '<button class="tab'+(i===0?' on':'')+'" data-tab="'+t[0]+'">'+t[1]+'</button>'; }).join('');
   nav.querySelectorAll('[data-tab]').forEach(function(b){
@@ -75,6 +82,7 @@ function buildTabs(){
       $('panel-'+tab).style.display='block';
       if(tab==='products') renderProducts();
       if(tab==='categories') renderCategories();
+      if(tab==='drivers') renderDrivers();
       if(tab==='orders') renderOrders();
       if(tab==='settings') renderSettings();
     };
@@ -297,6 +305,83 @@ function saveCat(){
 }
 
 /* ============================================================
+   ДРАЙВЕРА
+   ============================================================ */
+function renderDrivers(){
+  var list=$('driversList');
+  var drivers=S.drivers();
+  if(!drivers.length){ list.innerHTML='<div class="a-empty">Драйверов нет. Нажмите «Добавить драйвер».</div>'; return; }
+  list.innerHTML=drivers.map(function(d){
+    var has = d.url ? 'ссылка' : (d.file ? 'файл в базе' : '<span style="color:#ff6b6b">нет файла</span>');
+    return '<div class="a-row">'+
+      '<div class="a-info"><div class="a-name">'+esc(d.name)+' <em>v'+esc(d.version||'—')+'</em></div>'+
+        '<div class="a-sub">'+esc(d.device||'—')+' · '+esc(d.os||'—')+(d.size?' · '+esc(d.size):'')+' · '+has+'</div></div>'+
+      '<div class="a-actions"><button class="a-btn" data-dedit="'+esc(d.id)+'">Изменить</button><button class="a-btn danger" data-ddel="'+esc(d.id)+'">Удалить</button></div>'+
+    '</div>';
+  }).join('');
+  list.querySelectorAll('[data-dedit]').forEach(function(b){ b.onclick=function(){ openDriverEditor(b.getAttribute('data-dedit')); }; });
+  list.querySelectorAll('[data-ddel]').forEach(function(b){ b.onclick=function(){
+    if(!confirm('Удалить драйвер?')) return;
+    S.saveDrivers(S.drivers().filter(function(x){return x.id!==b.getAttribute('data-ddel');})); renderDrivers();
+  }; });
+}
+var editingDrv=null;
+function openDriverEditor(id){
+  if(id) editingDrv=JSON.parse(JSON.stringify(S.drivers().filter(function(x){return x.id===id;})[0]));
+  else editingDrv={ id:uid('d'), name:'', device:'', version:'', os:'Windows 10/11', size:'', url:'', file:'', fileName:'', updated:new Date().toISOString().slice(0,10), note:'' };
+  $('drvEditorTitle').textContent=id?'Изменить драйвер':'Новый драйвер';
+  $('drvEditorBody').innerHTML=
+    fieldText('Название','drv_name',editingDrv.name)+
+    '<div class="a-grid2">'+
+      fieldText('Для устройства','drv_device',editingDrv.device)+
+      fieldText('Версия','drv_version',editingDrv.version)+
+    '</div>'+
+    '<div class="a-grid2">'+
+      fieldText('Система (ОС)','drv_os',editingDrv.os)+
+      fieldText('Размер (напр. 48 МБ)','drv_size',editingDrv.size)+
+    '</div>'+
+    fieldText('Дата обновления','drv_updated',editingDrv.updated)+
+    '<div class="a-field"><label>Примечание</label><textarea id="drv_note" rows="2">'+esc(editingDrv.note||'')+'</textarea></div>'+
+    '<div class="a-sep">Файл драйвера</div>'+
+    '<div class="a-hint">Рекомендуется: залейте файл на хостинг/облако и вставьте <b>прямую ссылку</b> на скачивание (не переполняет базу). Либо загрузите небольшой файл прямо сюда (до ~4 МБ — из-за лимита браузера).</div>'+
+    fieldText('Ссылка на скачивание (URL)','drv_url',editingDrv.url)+
+    '<div id="drv_fileState" class="a-hint"></div>'+
+    '<label class="a-upload">Загрузить файл в базу<input type="file" id="drv_fileInput" hidden></label> '+
+    '<button class="a-btn" id="drv_fileClear">Убрать загруженный файл</button>';
+  updateDrvFileState();
+  $('drv_fileInput').onchange=function(e){
+    var f=e.target.files[0]; if(!f) return;
+    if(f.size>4*1024*1024){ alert('Файл больше 4 МБ — используйте ссылку на скачивание вместо загрузки в базу.'); e.target.value=''; return; }
+    var r=new FileReader();
+    r.onload=function(){ editingDrv.file=r.result; editingDrv.fileName=f.name; if(!editingDrv.size) editingDrv.size=Math.round(f.size/1024/1024*10)/10+' МБ'; updateDrvFileState(); };
+    r.readAsDataURL(f); e.target.value='';
+  };
+  $('drv_fileClear').onclick=function(){ editingDrv.file=''; editingDrv.fileName=''; updateDrvFileState(); };
+  $('drvEditorModal').classList.add('open');
+}
+function updateDrvFileState(){
+  var el=$('drv_fileState'); if(!el) return;
+  el.innerHTML = editingDrv.file ? ('Загружен файл в базу: <b>'+esc(editingDrv.fileName||'файл')+'</b>') : 'Файл в базу не загружен.';
+}
+function saveDriver(){
+  editingDrv.name=$('drv_name').value.trim();
+  if(!editingDrv.name){ alert('Введите название драйвера'); return; }
+  editingDrv.device=$('drv_device').value.trim();
+  editingDrv.version=$('drv_version').value.trim();
+  editingDrv.os=$('drv_os').value.trim();
+  editingDrv.size=$('drv_size').value.trim();
+  editingDrv.updated=$('drv_updated').value.trim();
+  editingDrv.note=$('drv_note').value.trim();
+  editingDrv.url=$('drv_url').value.trim();
+  var drivers=S.drivers();
+  var idx=-1; drivers.forEach(function(d,i){ if(d.id===editingDrv.id) idx=i; });
+  if(idx>=0) drivers[idx]=editingDrv; else drivers.push(editingDrv);
+  try{ S.saveDrivers(drivers); }
+  catch(e){ alert('Не удалось сохранить — возможно, файл слишком большой для базы браузера. Используйте ссылку на скачивание.'); return; }
+  $('drvEditorModal').classList.remove('open'); editingDrv=null; renderDrivers();
+}
+
+/* ============================================================
    ЗАКАЗЫ
    ============================================================ */
 function renderOrders(){
@@ -347,6 +432,15 @@ function renderSettings(){
     '<div class="a-hint">Заказы из формы уходят вам в WhatsApp/Telegram по этим контактам. Заполните хотя бы один.</div>'+
     fieldNum('Порог бесплатной доставки','set_freeShipping',s.freeShipping)+
 
+    '<div class="a-sep">Баннер (первый экран)</div>'+
+    '<div class="a-hint">Отдельное фото для большого баннера на главной (независимо от фото товаров). Если не загружать — баннер покажет первое фото товара p1. Лучше широкая картинка, тёмная слева под текст.</div>'+
+    '<div id="set_heroPreview" class="a-logo-preview" style="width:200px;height:100px"></div>'+
+    '<label class="a-upload">Загрузить фото баннера<input type="file" id="set_heroInput" accept="image/*" hidden></label> '+
+    '<button class="a-btn" id="set_heroReset">Убрать фото баннера</button>'+
+    fieldText('Большой заголовок','set_heroTitle',s.heroTitle)+
+    fieldText('Подзаголовок (строка с разрядкой)','set_heroTagline',s.heroTagline)+
+    fieldText('Мелкий текст (можно оставить пустым)','set_heroDesc',s.heroDesc)+
+
     '<div class="a-sep">Логотип</div>'+
     '<div class="a-hint">По умолчанию — конь AT. Можно загрузить свой (PNG с прозрачным фоном, белый вариант).</div>'+
     '<div id="set_logoPreview" class="a-logo-preview"></div>'+
@@ -354,7 +448,7 @@ function renderSettings(){
     '<button class="a-btn" id="set_logoReset">Сбросить логотип</button>'+
 
     '<div class="a-sep">Пароль админ-панели</div>'+
-    fieldText('Пароль','set_adminPass',s.adminPass)+
+    fieldText('Пароль','set_adminPass',adminPass())+
     '<div class="a-hint">Обязательно смените пароль по умолчанию.</div>'+
 
     '<div class="a-sep">Публикация каталога</div>'+
@@ -369,6 +463,7 @@ function renderSettings(){
     '<div class="a-btnrow" style="margin-top:20px"><button class="a-btn primary" id="set_save">Сохранить настройки</button><span id="set_saved" class="a-saved">Сохранено ✓</span></div>';
 
   renderLogoPreview();
+  renderHeroPreview();
   var usedKB=Math.round(storageUsage()/1024);
   $('set_usage').textContent='Занято в браузере: ~'+usedKB+' КБ из ~5000 КБ. Если приближается к лимиту — уменьшайте размер фото.';
 
@@ -377,6 +472,11 @@ function renderSettings(){
     fileToDataUrl(f,300,function(url){ if(url){ var st=S.settings(); st.logo=url; S.saveSettings(st); renderLogoPreview(); } e.target.value=''; });
   };
   $('set_logoReset').onclick=function(){ var st=S.settings(); st.logo=''; S.saveSettings(st); renderLogoPreview(); };
+  $('set_heroInput').onchange=function(e){
+    var f=e.target.files[0]; if(!f) return;
+    fileToDataUrl(f,1600,function(url){ if(url){ var st=S.settings(); st.heroImage=url; S.saveSettings(st); renderHeroPreview(); } e.target.value=''; });
+  };
+  $('set_heroReset').onclick=function(){ var st=S.settings(); st.heroImage=''; S.saveSettings(st); renderHeroPreview(); };
   $('set_export').onclick=exportData;
   $('set_import').onchange=importData;
   $('set_reset').onclick=function(){ if(confirm('Сбросить все товары, категории и настройки к демонстрационным? Действие необратимо.')){ S.reset(); alert('Сброшено. Страница перезагрузится.'); location.reload(); } };
@@ -384,7 +484,11 @@ function renderSettings(){
 }
 function renderLogoPreview(){
   var s=S.settings(); var box=$('set_logoPreview'); if(!box) return;
-  box.innerHTML='<img src="'+esc(s.logo||'assets/logo.svg')+'" alt="logo">';
+  box.innerHTML='<img src="'+esc(s.logo||'assets/logo.png')+'" alt="logo">';
+}
+function renderHeroPreview(){
+  var s=S.settings(); var box=$('set_heroPreview'); if(!box) return;
+  box.innerHTML = s.heroImage ? '<img src="'+esc(s.heroImage)+'" alt="banner">' : '<span style="font-family:var(--mono);font-size:10px;color:var(--dim)">нет фото</span>';
 }
 function saveSettings(){
   var s=S.settings();
@@ -394,6 +498,9 @@ function saveSettings(){
   s.whatsapp=$('set_whatsapp').value.trim();
   s.telegram=$('set_telegram').value.trim();
   s.freeShipping=+$('set_freeShipping').value||0;
+  s.heroTitle=$('set_heroTitle').value;
+  s.heroTagline=$('set_heroTagline').value;
+  s.heroDesc=$('set_heroDesc').value;
   s.adminPass=$('set_adminPass').value||s.adminPass;
   S.saveSettings(s);
   var saved=$('set_saved'); saved.style.opacity='1'; setTimeout(function(){ saved.style.opacity='0'; },1600);
@@ -401,7 +508,7 @@ function saveSettings(){
 function exportData(){
   var s=Object.assign({}, S.settings()); delete s.adminPass; // пароль не публикуем
   var data={ __at:'AT_CYBERSPORT_CATALOG', version:1, publishedAt:new Date().toISOString(),
-    products:S.products(), categories:S.categories(), settings:s };
+    products:S.products(), categories:S.categories(), drivers:S.drivers(), settings:s };
   var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   var a=document.createElement('a'); a.href=URL.createObjectURL(blob);
   a.download='catalog.json';
@@ -417,6 +524,7 @@ function importData(e){
       if(!okTag && !confirm('Файл не похож на каталог AT Cybersport. Всё равно импортировать?')) { e.target.value=''; return; }
       if(d.products) S.saveProducts(d.products);
       if(d.categories) S.saveCategories(d.categories);
+      if(d.drivers) S.saveDrivers(d.drivers);
       if(d.settings){ var cur=S.settings(); var ns=Object.assign({}, cur, d.settings); ns.adminPass=cur.adminPass; S.saveSettings(ns); }
       alert('Импортировано. Страница перезагрузится.');
       location.reload();
@@ -439,6 +547,10 @@ function init(){
   $('editorCancel').onclick=closeEditor;
   $('editorModal').addEventListener('click',function(e){ if(e.target.id==='editorModal') closeEditor(); });
   $('addProductBtn').onclick=function(){ openProductEditor(null); };
+  $('addDriverBtn').onclick=function(){ openDriverEditor(null); };
+  $('drvSave').onclick=saveDriver;
+  $('drvCancel').onclick=function(){ $('drvEditorModal').classList.remove('open'); editingDrv=null; };
+  $('drvEditorModal').addEventListener('click',function(e){ if(e.target.id==='drvEditorModal'){ $('drvEditorModal').classList.remove('open'); editingDrv=null; } });
   $('catSave').onclick=saveCat;
   $('catCancel').onclick=function(){ $('catEditorModal').classList.remove('open'); editingCat=null; };
   $('addCatBtn').onclick=function(){ openCatEditor(null); };

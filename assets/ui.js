@@ -22,35 +22,25 @@ function popularCell(p, delay){
   '</a>';
 }
 
-/* карточка каталога */
+/* карточка каталога (стиль LUNACY: название сверху, фото по центру, цена внизу) */
 function catalogCard(p){
   var href='product.html?id='+encodeURIComponent(p.id);
-  var cat=catById(p.category);
   var badge = p.badge ? '<span class="badge">'+esc(p.badge)+'</span>' : '';
   return '<a href="'+href+'" class="card" data-reveal data-cat="'+esc(p.category)+'">'+
-    '<div class="thumb">'+imgOrPh(firstImg(p),'ФОТО')+
-      '<span class="tag">'+esc(cat?catName(cat):'')+'</span>'+badge+
-    '</div>'+
-    '<div class="body">'+
-      '<div class="cname">'+esc(p.name)+'</div>'+
-      '<div class="cspec">'+esc(p.spec||'')+'</div>'+
-      '<div class="cfoot"><span class="cprice">'+money(p.price)+'</span><span class="cadd" data-add="'+esc(p.id)+'">'+t('addCart')+'</span></div>'+
-    '</div>'+
+    badge+
+    '<div class="cname">'+esc(p.name)+'</div>'+
+    '<div class="cimg">'+imgOrPh(firstImg(p),'ФОТО')+'</div>'+
+    '<div class="cfoot"><span class="cprice">'+money(p.price)+'</span><span class="cadd" data-add="'+esc(p.id)+'">'+t('addCart')+'</span></div>'+
   '</a>';
 }
 
-/* карточка "с этим берут" / связанные */
+/* карточка "с этим берут" / связанные — тот же стиль */
 function relatedCard(p){
   var href='product.html?id='+encodeURIComponent(p.id);
-  var cat=catById(p.category);
   return '<a href="'+href+'" class="card">'+
-    '<div class="thumb" style="aspect-ratio:4/3">'+imgOrPh(firstImg(p),'ФОТО')+
-      '<span class="tag">'+esc(cat?catName(cat):'')+'</span>'+
-    '</div>'+
-    '<div class="body" style="display:flex;justify-content:space-between;align-items:flex-end">'+
-      '<div><div class="cname" style="font-size:18px">'+esc(p.name)+'</div><div class="cspec" style="font-size:12px;margin-top:4px">'+esc(p.spec||'')+'</div></div>'+
-      '<span class="cprice" style="font-size:16px">'+money(p.price)+'</span>'+
-    '</div>'+
+    '<div class="cname">'+esc(p.name)+'</div>'+
+    '<div class="cimg">'+imgOrPh(firstImg(p),'ФОТО')+'</div>'+
+    '<div class="cfoot"><span class="cprice">'+money(p.price)+'</span></div>'+
   '</a>';
 }
 
