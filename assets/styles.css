@@ -31,7 +31,6 @@
 }
 
 *{box-sizing:border-box;}
-
 html{scroll-behavior:smooth;}
 body{
   margin:0;
@@ -235,7 +234,7 @@ button{font-family:inherit;}
 .empty{max-width:var(--maxw-in);margin:60px auto 0;text-align:center;font-family:var(--mono);font-size:13px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;}
 
 /* ============================== PRODUCT PAGE ============================== */
-.crumb{max-width:var(--maxw-in);margin:0 auto;padding:24px var(--pad-x) 0;font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--dim);}
+.crumb{max-width:var(--maxw-in);margin:0 auto;padding:104px var(--pad-x) 0;font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--dim);}
 .crumb a{color:var(--dim);text-decoration:none;}
 .crumb .cur{color:#cfcfd4;}
 .product{max-width:var(--maxw-in);margin:0 auto;padding:clamp(24px,4vw,44px) var(--pad-x) clamp(60px,8vw,100px);display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(30px,5vw,72px);align-items:start;}

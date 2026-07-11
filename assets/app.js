@@ -1,17 +1,12 @@
-/* ============================================================
-   AT CYBERSPORT — core app (store + i18n + cart + order + fx)
-   Без сервера: данные в localStorage, управляются из admin.html
-   ============================================================ */
+/* AT CYBERSPORT — app.js: ядро (данные, языки, корзина, заказы) */
 (function(){
 'use strict';
 
-/* -------------------- КЛЮЧИ ХРАНИЛИЩА -------------------- */
 var K = {
   products:'at_products', categories:'at_categories', settings:'at_settings',
   orders:'at_orders', cart:'at_cart', lang:'at_lang', drivers:'at_drivers'
 };
 
-/* -------------------- ДАННЫЕ ПО УМОЛЧАНИЮ -------------------- */
 var DEFAULT_CATEGORIES = [
   { id:'mice',      slug:'мыши',       code:'0-01', name:{ru:'мыши',       tk:'syçanlar',    en:'mice'} },
   { id:'keyboards', slug:'клавиатуры', code:'0-02', name:{ru:'клавиатуры', tk:'klawiaturalar',en:'keyboards'} },
@@ -19,7 +14,7 @@ var DEFAULT_CATEGORIES = [
   { id:'pads',      slug:'коврики',    code:'0-04', name:{ru:'коврики',    tk:'halyçalar',   en:'pads'} }
 ];
 
-function P(o){ return o; } // хелпер читаемости
+function P(o){ return o; }
 var DEFAULT_PRODUCTS = [
   { id:'p1', name:'AT Stallion Pro', category:'mice', price:12990, oldPrice:15990, badge:'флагман',
     ref:'AT-MS-01', inStock:true,
@@ -91,22 +86,18 @@ var DEFAULT_SETTINGS = {
   currency:'TMT',
   city:'Ашхабад, Туркменистан',
   phone:'+993 6X XX XX XX',
-  whatsapp:'',            // номер для WhatsApp в межд. формате без + (напр. 99365000000)
-  telegram:'',            // username без @ или номер
+  whatsapp:'',
+  telegram:'',
   freeShipping:5000,
-  logo:'',                // data:URL если админ загрузил свой логотип
-  heroImage:'',           // отдельное фото для баннера (если пусто — берётся фото товара p1)
-  /* тексты первого экрана (баннера) — правятся в админке: Настройки → Баннер */
+  logo:'',
+  heroImage:'',
+
   heroTitle:'PRO SERIES',
   heroTagline:'играй на полную',
   heroDesc:'Мыши, клавиатуры и гарнитуры AT Cybersport — точность без компромиссов.'
-  /* adminPass намеренно НЕ хранится здесь: app.js публичный (грузится на всех
-     страницах), поэтому пароль в нём был бы виден в исходном коде.
-     Пароль по умолчанию задаётся в admin.js и сохраняется только в localStorage
-     администратора после первого входа/смены. */
+
 };
 
-/* -------------------- ПЕРЕВОДЫ -------------------- */
 var I18N = {
   ru:{
     'nav.catalog':'каталог','nav.tech':'технологии','nav.about':'команда','nav.drivers':'драйвера','nav.support':'поддержка',
@@ -209,7 +200,6 @@ var I18N = {
   }
 };
 
-/* -------------------- STORE -------------------- */
 function read(key, fallback){
   try{ var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
   catch(e){ return fallback; }
@@ -217,17 +207,26 @@ function read(key, fallback){
 function write(key, val){
   try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
 }
-/* Опубликованный каталог (data/catalog.json) — источник для покупателей.
-   Приоритет данных: localStorage (черновик админа на этом устройстве)
-   → FETCHED (опубликованный файл) → встроенные дефолты. */
+
 var FETCHED = null;
+var CACHE_KEY = 'at_catalog_cache';
 function loadCatalog(cb){
+  var cached=null;
+  try{ cached=JSON.parse(sessionStorage.getItem(CACHE_KEY)||'null'); }catch(e){}
+  var haveCache = cached && cached.__at==='AT_CYBERSPORT_CATALOG';
+  if(haveCache){ FETCHED=cached; cb(); }
   try{
-    fetch('data/catalog.json?ts='+Date.now())
+    fetch('data/catalog.json',{cache:'no-cache'})
       .then(function(r){ return r.ok ? r.json() : null; })
-      .then(function(j){ if(j && j.__at==='AT_CYBERSPORT_CATALOG') FETCHED=j; cb(); })
-      .catch(function(){ cb(); });
-  }catch(e){ cb(); }
+      .then(function(j){
+        if(j && j.__at==='AT_CYBERSPORT_CATALOG'){
+          FETCHED=j;
+          try{ sessionStorage.setItem(CACHE_KEY, JSON.stringify(j)); }catch(e){}
+        }
+        if(!haveCache) cb();
+      })
+      .catch(function(){ if(!haveCache) cb(); });
+  }catch(e){ if(!haveCache) cb(); }
 }
 var Store = {
   products:function(){ return read(K.products, null) || (FETCHED&&FETCHED.products) || DEFAULT_PRODUCTS.slice(); },
@@ -247,17 +246,15 @@ var Store = {
   reset:function(){ [K.products,K.categories,K.settings,K.orders,K.drivers].forEach(function(k){ localStorage.removeItem(k); }); }
 };
 
-/* -------------------- ХЕЛПЕРЫ -------------------- */
 var lang = Store.lang();
 function t(key){ var d = I18N[lang] || I18N.ru; return d[key] != null ? d[key] : (I18N.ru[key] != null ? I18N.ru[key] : key); }
 function catName(cat){ if(!cat) return ''; return (cat.name && cat.name[lang]) || (cat.name && cat.name.ru) || cat.slug || ''; }
 function catById(id){ return Store.categories().filter(function(c){return c.id===id;})[0]; }
 function money(n){ var s = Store.settings(); return (Number(n)||0).toLocaleString('ru-RU') + ' ' + s.currency; }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
-function logoSrc(){ var s = Store.settings(); return s.logo || 'assets/logo.png'; }
+function logoSrc(){ var s = Store.settings(); return s.logo || 'assets/logo.svg'; }
 function firstImg(prod){ return (prod.images && prod.images[0]) || ''; }
 
-/* -------------------- КОРЗИНА -------------------- */
 function cartCount(){ return Store.cart().reduce(function(a,i){return a+i.qty;},0); }
 function cartTotal(){ return Store.cart().reduce(function(a,i){return a+i.price*i.qty;},0); }
 function addToCart(prod, qty, color){
@@ -286,7 +283,6 @@ function updateCartBadges(){
   document.querySelectorAll('[data-cart-count]').forEach(function(el){ el.textContent = n; });
 }
 
-/* -------------------- РЕНДЕР КОРЗИНЫ + ЗАКАЗ -------------------- */
 function renderCart(){
   var body = document.getElementById('cartBody');
   var foot = document.getElementById('cartFoot');
@@ -323,7 +319,6 @@ function renderCart(){
 function openCart(){ var o=document.getElementById('overlay'),d=document.getElementById('cartDrawer'); if(o)o.classList.add('open'); if(d)d.classList.add('open'); }
 function closeCart(){ var o=document.getElementById('overlay'),d=document.getElementById('cartDrawer'); if(o)o.classList.remove('open'); if(d)d.classList.remove('open'); }
 
-/* -------------------- ORDER MODAL -------------------- */
 function buildOrderText(o){
   var s = Store.settings();
   var lines = [];
@@ -374,7 +369,7 @@ function submitOrder(){
   var orders=Store.orders(); orders.unshift(order); Store.saveOrders(orders);
   var text=buildOrderText(order);
   window.__orderText=text;
-  // показать экран отправки
+
   document.getElementById('orderForm').style.display='none';
   var suc=document.getElementById('orderSuccess'); suc.style.display='block';
   var s=Store.settings();
@@ -391,7 +386,7 @@ function submitOrder(){
       window.open(url,'_blank');
     };
   } else tg.style.display='none';
-  // очистить корзину после оформления
+
   Store.saveCart([]); updateCartBadges(); renderCart(); closeCart();
 }
 function copyText(txt){
@@ -399,7 +394,6 @@ function copyText(txt){
   else{ var ta=document.createElement('textarea'); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); }
 }
 
-/* -------------------- ИНЪЕКЦИЯ ОБЩЕГО UI (drawer + modal) -------------------- */
 function injectWhatsAppFab(){
   var s=Store.settings();
   var num=(s.whatsapp||'').replace(/\D/g,'');
@@ -461,7 +455,6 @@ function injectSharedUI(){
   document.getElementById('orderModal').addEventListener('click',function(e){ if(e.target.id==='orderModal') closeOrderModal(); });
 }
 
-/* -------------------- ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА + i18n DOM -------------------- */
 function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(function(el){ el.textContent = t(el.getAttribute('data-i18n')); });
   document.querySelectorAll('[data-i18n-html]').forEach(function(el){ el.innerHTML = t(el.getAttribute('data-i18n-html')); });
@@ -478,7 +471,6 @@ function buildLangSwitch(container, mobile){
   });
 }
 
-/* -------------------- НАВИГАЦИЯ (общая) -------------------- */
 function wireNav(){
   var nav=document.querySelector('.nav');
   if(nav){
@@ -494,7 +486,6 @@ function wireNav(){
   document.querySelectorAll('.lang[data-langswitch]').forEach(function(c){ buildLangSwitch(c); });
 }
 
-/* -------------------- REVEAL + АНИМАЦИИ -------------------- */
 function wireReveal(){
   var els=document.querySelectorAll('[data-reveal]');
   if(!els.length) return;
@@ -518,7 +509,6 @@ function wireTilt(){
   });
 }
 
-/* -------------------- ЭКСПОРТ В ГЛОБАЛ -------------------- */
 window.AT = {
   Store:Store, I18N:I18N, DEFAULT_CATEGORIES:DEFAULT_CATEGORIES, DEFAULT_PRODUCTS:DEFAULT_PRODUCTS, DEFAULT_SETTINGS:DEFAULT_SETTINGS, DEFAULT_DRIVERS:DEFAULT_DRIVERS,
   t:t, lang:function(){return lang;}, catName:catName, catById:catById, money:money, esc:esc, logoSrc:logoSrc, firstImg:firstImg,
@@ -526,7 +516,6 @@ window.AT = {
   applyI18n:applyI18n, init:init
 };
 
-/* -------------------- INIT -------------------- */
 var _ready=false, _readyCbs=[];
 function ready(cb){ if(_ready) cb(); else _readyCbs.push(cb); }
 function init(){
@@ -539,7 +528,7 @@ function init(){
     renderCart();
     _ready=true;
     _readyCbs.forEach(function(fn){ try{fn();}catch(e){console.error(e);} });
-    // анимации навешиваем после того, как страницы отрисовали динамику
+
     setTimeout(function(){ wireReveal(); wireMagnetic(); wireTilt(); }, 0);
   });
 }

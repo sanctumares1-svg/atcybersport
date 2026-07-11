@@ -1,27 +1,16 @@
-/* ============================================================
-   AT CYBERSPORT — admin.js
-   Полное управление каталогом: товары, категории, заказы, настройки.
-   Данные в localStorage. Экспорт/импорт JSON для переноса и бэкапа.
-   ============================================================ */
+/* AT CYBERSPORT — admin.js: логика админ-панели */
 (function(){
 'use strict';
 var AT=window.AT, S=AT.Store, esc=AT.esc, money=AT.money;
 
-/* Пароль админ-панели по умолчанию. Используется, только пока администратор
-   не задал свой (после этого свой пароль хранится в localStorage этого
-   браузера). ВАЖНО: это лишь «замок от честных людей» — настоящую защиту
-   даёт хостинг (см. README, раздел о безопасности) или отказ от загрузки
-   admin.html на сервер вовсе. Смените это значение перед публикацией. */
 var ADMIN_DEFAULT_PASS='atadmin';
 function adminPass(){ var s=S.settings(); return s.adminPass || ADMIN_DEFAULT_PASS; }
 
-/* ------- утилиты ------- */
 function $(id){ return document.getElementById(id); }
 function el(tag,cls,html){ var e=document.createElement(tag); if(cls)e.className=cls; if(html!=null)e.innerHTML=html; return e; }
 function uid(pre){ return (pre||'id')+'_'+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-3); }
 function slugify(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9а-яё]+/gi,'_').replace(/^_+|_+$/g,'')||uid('cat'); }
 
-/* сжатие картинки в dataURL, чтобы экономить localStorage */
 function fileToDataUrl(file, maxDim, cb){
   var reader=new FileReader();
   reader.onload=function(){
@@ -45,12 +34,9 @@ function fileToDataUrl(file, maxDim, cb){
 function storageUsage(){
   var total=0;
   try{ for(var k in localStorage){ if(localStorage.hasOwnProperty(k)) total+=(localStorage[k].length+k.length); } }catch(e){}
-  return total; // символов ~ байт
+  return total;
 }
 
-/* ============================================================
-   ЛОГИН
-   ============================================================ */
 function initLogin(){
   $('loginBtn').onclick=function(){
     var pass=$('loginPass').value;
@@ -66,9 +52,6 @@ function showPanel(){
   renderProducts();
 }
 
-/* ============================================================
-   ВКЛАДКИ
-   ============================================================ */
 function buildTabs(){
   var tabs=[['products','Товары'],['categories','Категории'],['drivers','Драйвера'],['orders','Заказы'],['settings','Настройки']];
   var nav=$('tabNav');
@@ -89,9 +72,6 @@ function buildTabs(){
   });
 }
 
-/* ============================================================
-   ТОВАРЫ
-   ============================================================ */
 function renderProducts(){
   var products=S.products(), cats=S.categories();
   var list=$('productsList');
@@ -114,7 +94,7 @@ function renderProducts(){
   }; });
 }
 
-var editing=null; // текущий редактируемый товар (draft)
+var editing=null;
 
 function openProductEditor(id){
   var cats=S.categories();
@@ -240,7 +220,7 @@ function saveProduct(){
   editing.spec=$('ed_spec').value.trim();
   editing.inStock=$('ed_inStock').checked;
   editing.description=$('ed_description').value.trim();
-  // очистить пустые повторяющиеся
+
   editing.colors=editing.colors.filter(function(c){return c.name;});
   editing.quick=editing.quick.filter(function(q){return q[0]||q[1];});
   editing.specs=editing.specs.filter(function(s){return s[0]||s[1];});
@@ -256,9 +236,6 @@ function saveProduct(){
 }
 function closeEditor(){ $('editorModal').classList.remove('open'); editing=null; }
 
-/* ============================================================
-   КАТЕГОРИИ
-   ============================================================ */
 function renderCategories(){
   var cats=S.categories();
   var list=$('categoriesList');
@@ -304,9 +281,6 @@ function saveCat(){
   $('catEditorModal').classList.remove('open'); editingCat=null; renderCategories();
 }
 
-/* ============================================================
-   ДРАЙВЕРА
-   ============================================================ */
 function renderDrivers(){
   var list=$('driversList');
   var drivers=S.drivers();
@@ -381,9 +355,6 @@ function saveDriver(){
   $('drvEditorModal').classList.remove('open'); editingDrv=null; renderDrivers();
 }
 
-/* ============================================================
-   ЗАКАЗЫ
-   ============================================================ */
 function renderOrders(){
   var orders=S.orders();
   var list=$('ordersList');
@@ -413,9 +384,6 @@ function renderOrders(){
   }; });
 }
 
-/* ============================================================
-   НАСТРОЙКИ
-   ============================================================ */
 function renderSettings(){
   var s=S.settings();
   $('panel-settings').querySelector('.settings-form').innerHTML=
@@ -484,7 +452,7 @@ function renderSettings(){
 }
 function renderLogoPreview(){
   var s=S.settings(); var box=$('set_logoPreview'); if(!box) return;
-  box.innerHTML='<img src="'+esc(s.logo||'assets/logo.png')+'" alt="logo">';
+  box.innerHTML='<img src="'+esc(s.logo||'assets/logo.svg')+'" alt="logo">';
 }
 function renderHeroPreview(){
   var s=S.settings(); var box=$('set_heroPreview'); if(!box) return;
@@ -506,7 +474,7 @@ function saveSettings(){
   var saved=$('set_saved'); saved.style.opacity='1'; setTimeout(function(){ saved.style.opacity='0'; },1600);
 }
 function exportData(){
-  var s=Object.assign({}, S.settings()); delete s.adminPass; // пароль не публикуем
+  var s=Object.assign({}, S.settings()); delete s.adminPass;
   var data={ __at:'AT_CYBERSPORT_CATALOG', version:1, publishedAt:new Date().toISOString(),
     products:S.products(), categories:S.categories(), drivers:S.drivers(), settings:s };
   var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -534,15 +502,12 @@ function importData(e){
   r.readAsText(f);
 }
 
-/* ============================================================
-   INIT
-   ============================================================ */
 function init(){
   AT.ready(function(){
     if(sessionStorage.getItem('at_admin_ok')==='1'){ showPanel(); }
     else{ initLogin(); }
   });
-  // кнопки редакторов
+
   $('editorSave').onclick=saveProduct;
   $('editorCancel').onclick=closeEditor;
   $('editorModal').addEventListener('click',function(e){ if(e.target.id==='editorModal') closeEditor(); });

@@ -1,6 +1,4 @@
-/* ============================================================
-   AT CYBERSPORT — ui.js: рендер карточек (общий для всех страниц)
-   ============================================================ */
+/* AT CYBERSPORT — ui.js: рендер карточек (общий для всех страниц) */
 (function(){
 'use strict';
 function ready(fn){ if(window.AT) fn(); else document.addEventListener('DOMContentLoaded',fn); }
@@ -12,7 +10,6 @@ function imgOrPh(src, phText){
   return src ? '<img src="'+esc(src)+'" alt="">' : '<div class="ph">'+esc(phText||'ФОТО')+'</div>';
 }
 
-/* карточка на главной ("популярные товары") */
 function popularCell(p, delay){
   var href='product.html?id='+encodeURIComponent(p.id);
   return '<a href="'+href+'" class="prod-cell" data-reveal '+(delay?'data-delay="'+delay+'"':'')+'>'+
@@ -22,7 +19,6 @@ function popularCell(p, delay){
   '</a>';
 }
 
-/* карточка каталога (стиль LUNACY: название сверху, фото по центру, цена внизу) */
 function catalogCard(p){
   var href='product.html?id='+encodeURIComponent(p.id);
   var badge = p.badge ? '<span class="badge">'+esc(p.badge)+'</span>' : '';
@@ -34,7 +30,6 @@ function catalogCard(p){
   '</a>';
 }
 
-/* карточка "с этим берут" / связанные — тот же стиль */
 function relatedCard(p){
   var href='product.html?id='+encodeURIComponent(p.id);
   return '<a href="'+href+'" class="card">'+
@@ -44,7 +39,6 @@ function relatedCard(p){
   '</a>';
 }
 
-/* категория на главной */
 function categoryCell(cat, delay, sampleImg){
   return '<a href="catalog.html?cat='+encodeURIComponent(cat.id)+'" class="cat-cell" data-reveal '+(delay?'data-delay="'+delay+'"':'')+'>'+
     '<div class="code">/ '+esc(cat.code||'0-00')+' / <b>'+esc(catName(cat))+'</b></div>'+
@@ -53,7 +47,6 @@ function categoryCell(cat, delay, sampleImg){
   '</a>';
 }
 
-/* быстрый "в корзину" из карточки каталога (клик по пилюле) */
 function wireCatalogAdd(root){
   (root||document).querySelectorAll('[data-add]').forEach(function(el){
     el.addEventListener('click',function(e){
