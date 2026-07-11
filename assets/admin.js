@@ -447,12 +447,13 @@ function renderSettings(){
   $('set_heroReset').onclick=function(){ var st=S.settings(); st.heroImage=''; S.saveSettings(st); renderHeroPreview(); };
   $('set_export').onclick=exportData;
   $('set_import').onchange=importData;
+  
   $('set_reset').onclick=function(){ if(confirm('Сбросить все товары, категории и настройки к демонстрационным? Действие необратимо.')){ S.reset(); alert('Сброшено. Страница перезагрузится.'); location.reload(); } };
   $('set_save').onclick=saveSettings;
 }
 function renderLogoPreview(){
   var s=S.settings(); var box=$('set_logoPreview'); if(!box) return;
-  box.innerHTML='<img src="'+esc(s.logo||'assets/logo.svg')+'" alt="logo">';
+  box.innerHTML='<img src="'+esc(s.logo||'assets/logo.png')+'" alt="logo">';
 }
 function renderHeroPreview(){
   var s=S.settings(); var box=$('set_heroPreview'); if(!box) return;

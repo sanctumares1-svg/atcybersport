@@ -252,7 +252,7 @@ function catName(cat){ if(!cat) return ''; return (cat.name && cat.name[lang]) |
 function catById(id){ return Store.categories().filter(function(c){return c.id===id;})[0]; }
 function money(n){ var s = Store.settings(); return (Number(n)||0).toLocaleString('ru-RU') + ' ' + s.currency; }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];}); }
-function logoSrc(){ var s = Store.settings(); return s.logo || 'assets/logo.svg'; }
+function logoSrc(){ var s = Store.settings(); return s.logo || 'assets/logo.png'; }
 function firstImg(prod){ return (prod.images && prod.images[0]) || ''; }
 
 function cartCount(){ return Store.cart().reduce(function(a,i){return a+i.qty;},0); }
